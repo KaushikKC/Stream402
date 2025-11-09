@@ -1,26 +1,26 @@
-import { Address } from 'viem'
-import { paymentMiddleware, Resource, Network } from 'x402-next'
-import { NextRequest } from 'next/server'
+import { Address } from "viem";
+import { paymentMiddleware, Resource, Network } from "x402-next";
+import { NextRequest } from "next/server";
 
-const address = process.env.NEXT_PUBLIC_RECEIVER_ADDRESS as Address
-const network = process.env.NEXT_PUBLIC_NETWORK as Network
-const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource
-const cdpClientKey = process.env.NEXT_PUBLIC_CDP_CLIENT_KEY as string
+const address = process.env.NEXT_PUBLIC_RECEIVER_ADDRESS as Address;
+const network = process.env.NEXT_PUBLIC_NETWORK as Network;
+const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource;
+const cdpClientKey = process.env.NEXT_PUBLIC_CDP_CLIENT_KEY as string;
 
 const x402PaymentMiddleware = paymentMiddleware(
   address,
   {
-    '/content/cheap': {
-      price: '$0.01',
+    "/content/cheap": {
+      price: "$0.01",
       config: {
-        description: 'Access to cheap content',
+        description: "Access to cheap content",
       },
       network,
     },
-    '/content/expensive': {
-      price: '$0.25',
+    "/content/expensive": {
+      price: "$0.25",
       config: {
-        description: 'Access to expensive content',
+        description: "Access to expensive content",
       },
       network,
     },
@@ -30,18 +30,18 @@ const x402PaymentMiddleware = paymentMiddleware(
   },
   {
     cdpClientKey,
-    appLogo: '/logos/x402-examples.png',
-    appName: 'x402 Demo',
-    sessionTokenEndpoint: '/api/x402/session-token',
-  },
-)
+    appLogo: "/logos/x402-examples.png",
+    appName: "x402 Demo",
+    sessionTokenEndpoint: "/api/x402/session-token",
+  }
+);
 
 export const middleware = (req: NextRequest) => {
   const delegate = x402PaymentMiddleware as unknown as (
-    request: NextRequest,
-  ) => ReturnType<typeof x402PaymentMiddleware>
-  return delegate(req)
-}
+    request: NextRequest
+  ) => ReturnType<typeof x402PaymentMiddleware>;
+  return delegate(req);
+};
 
 // Configure which paths the middleware should run on
 export const config = {
@@ -51,8 +51,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (metadata files)
+     * - /api (API routes - exclude all API routes from payment middleware)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-    '/', // Include the root path explicitly
+    "/((?!_next/static|_next/image|favicon.ico|api).*)",
+    "/", // Include the root path explicitly
   ],
-}
+};

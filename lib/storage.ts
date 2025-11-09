@@ -19,6 +19,8 @@ export interface AssetMetadata {
   recipient: string;
   filename: string;
   thumbFilename?: string;
+  ipfsCid?: string; // IPFS Content Identifier
+  ipfsUrl?: string; // IPFS URL for the image
   createdAt: number;
 }
 

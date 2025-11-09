@@ -21,6 +21,7 @@ export async function verifyPayment(
   assetId: string
 ): Promise<{ valid: boolean; error?: string }> {
   try {
+    // Get transaction with full details
     const tx = await connection.getTransaction(signature, {
       maxSupportedTransactionVersion: 0,
     });
@@ -40,61 +41,122 @@ export async function verifyPayment(
       };
     }
 
+    // Debug: Log transaction details
+    console.log("Verifying payment:", {
+      signature,
+      recipient,
+      requiredAmount: requiredAmount.toString(),
+      postTokenBalances: tx.meta.postTokenBalances?.length || 0,
+      preTokenBalances: tx.meta.preTokenBalances?.length || 0,
+    });
+
     const recipientPubkey = new PublicKey(recipient);
 
-    // Check for SPL token transfer
-    const tokenTransfers = tx.meta.postTokenBalances?.filter(
-      (balance) => balance.owner === recipientPubkey.toBase58()
-    );
+    // Get the asset mint from config to verify we're checking the right token
+    const expectedMint = solanaConfig.mint;
 
-    if (!tokenTransfers || tokenTransfers.length === 0) {
-      return { valid: false, error: "No token transfer to recipient found" };
-    }
+    // Find all token balances for the recipient
+    const recipientPostBalances =
+      tx.meta.postTokenBalances?.filter(
+        (b) => b.owner === recipientPubkey.toBase58()
+      ) || [];
 
-    // Find the transfer instruction
-    let transferAmount = BigInt(0);
-    const instructions = tx.transaction.message.compiledInstructions;
+    const recipientPreBalances =
+      tx.meta.preTokenBalances?.filter(
+        (b) => b.owner === recipientPubkey.toBase58()
+      ) || [];
 
-    for (const instruction of instructions) {
-      const programId =
-        tx.transaction.message.staticAccountKeys[instruction.programIdIndex];
-
-      // Check if it's a token program instruction
-      if (
-        programId.toBase58() === "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-      ) {
-        // This is a token program instruction
-        // We need to check if it's a transfer to our recipient
-        // For simplicity, we'll check the post token balances
-      }
-    }
-
-    // Check post token balances for the recipient
-    const recipientBalance = tx.meta.postTokenBalances?.find(
-      (b) => b.owner === recipientPubkey.toBase58()
-    );
-
-    if (!recipientBalance) {
+    if (recipientPostBalances.length === 0) {
       return {
         valid: false,
-        error: "Recipient balance not found in transaction",
+        error: "No token balance found for recipient in transaction",
       };
     }
 
-    // Get pre-balance to calculate transfer amount
-    const preBalance = tx.meta.preTokenBalances?.find(
-      (b) =>
-        b.owner === recipientPubkey.toBase58() &&
-        b.mint === recipientBalance.mint &&
-        b.accountIndex === recipientBalance.accountIndex
-    );
+    // Find the token account that matches our expected mint
+    // Check both by mint and by account index
+    let transferAmount = BigInt(0);
+    let foundTransfer = false;
 
-    // Calculate transfer amount from raw token amounts (in smallest unit)
-    const preAmountRaw = preBalance
-      ? BigInt(preBalance.uiTokenAmount.amount || "0")
-      : BigInt(0);
-    const postAmountRaw = BigInt(recipientBalance.uiTokenAmount.amount || "0");
-    transferAmount = postAmountRaw - preAmountRaw;
+    for (const postBalance of recipientPostBalances) {
+      // Skip if mint doesn't match (if we have a specific mint to check)
+      if (expectedMint && postBalance.mint !== expectedMint) {
+        continue;
+      }
+
+      // Find corresponding pre-balance by account index
+      const preBalance = recipientPreBalances.find(
+        (b) => b.accountIndex === postBalance.accountIndex
+      );
+
+      const preAmountRaw = preBalance
+        ? BigInt(preBalance.uiTokenAmount.amount || "0")
+        : BigInt(0);
+      const postAmountRaw = BigInt(postBalance.uiTokenAmount.amount || "0");
+      const diff = postAmountRaw - preAmountRaw;
+
+      // If this account received tokens, use it
+      if (diff > 0) {
+        transferAmount = diff;
+        foundTransfer = true;
+        break;
+      }
+    }
+
+    // If we didn't find a transfer by comparing balances, check if a new account was created
+    // A new account would have a post balance but no pre balance
+    if (!foundTransfer) {
+      for (const postBalance of recipientPostBalances) {
+        if (expectedMint && postBalance.mint !== expectedMint) {
+          continue;
+        }
+
+        const preBalance = recipientPreBalances.find(
+          (b) => b.accountIndex === postBalance.accountIndex
+        );
+
+        // If no pre-balance exists, this is a new account
+        // The entire post balance is the transfer amount
+        if (!preBalance) {
+          const postAmountRaw = BigInt(postBalance.uiTokenAmount.amount || "0");
+          if (postAmountRaw > 0) {
+            transferAmount = postAmountRaw;
+            foundTransfer = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!foundTransfer || transferAmount === BigInt(0)) {
+      // Debug: Log what we found
+      console.log("Payment verification failed - no transfer found:", {
+        recipientPostBalances: recipientPostBalances.map((b) => ({
+          mint: b.mint,
+          owner: b.owner,
+          amount: b.uiTokenAmount.amount,
+          accountIndex: b.accountIndex,
+        })),
+        recipientPreBalances: recipientPreBalances.map((b) => ({
+          mint: b.mint,
+          owner: b.owner,
+          amount: b.uiTokenAmount.amount,
+          accountIndex: b.accountIndex,
+        })),
+        expectedMint,
+      });
+      return {
+        valid: false,
+        error: "No token transfer to recipient found in transaction",
+      };
+    }
+
+    // Debug: Log successful transfer detection
+    console.log("Transfer amount detected:", {
+      transferAmount: transferAmount.toString(),
+      requiredAmount: requiredAmount.toString(),
+      match: transferAmount >= requiredAmount,
+    });
 
     if (transferAmount < requiredAmount) {
       return {
@@ -104,24 +166,8 @@ export async function verifyPayment(
     }
 
     // Check memo if present (optional - for binding to assetId)
-    const memoInstruction = tx.transaction.message.compiledInstructions.find(
-      (ix) => {
-        const programId =
-          tx.transaction.message.staticAccountKeys[ix.programIdIndex];
-        return (
-          programId.toBase58() === "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
-        );
-      }
-    );
-
-    // If memo exists, verify it matches assetId
-    if (memoInstruction) {
-      const memoData = Buffer.from(memoInstruction.data).toString("utf-8");
-      if (!memoData.includes(assetId)) {
-        // Memo doesn't match, but we'll still accept if amount is correct
-        // This is more lenient for MVP
-      }
-    }
+    // Note: Memo checking is optional for MVP - we verify by amount and recipient
+    // In production, you might want to add memo verification for additional security
 
     return { valid: true };
   } catch (error) {

@@ -51,6 +51,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "uuid": "^10.0.0",
+    "pinata": "^2.5.1",
     "x402-next": "^0.7.1"
   },
   "devDependencies": {

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletButton } from "@/components/solana/solana-provider";
 import { useRouter } from "next/navigation";
 
 export default function UploadPage() {
@@ -75,17 +74,28 @@ export default function UploadPage() {
         {!connected && (
           <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
             <p className="mb-2">
-              Connect your wallet to set it as the recipient address:
+              Connect your wallet from the navbar above to set it as the
+              recipient address.
             </p>
-            <WalletButton />
+            <p className="text-sm text-gray-600 mt-1">
+              Or enter a different recipient wallet address below.
+            </p>
           </div>
         )}
 
         {connected && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded">
-            <p>Connected: {publicKey?.toBase58()}</p>
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+            <p className="font-semibold">
+              Connected Wallet: {publicKey?.toBase58()}
+            </p>
             <p className="text-sm text-gray-600 mt-1">
-              This will be used as the recipient address if not specified
+              This will be used as the recipient address if not specified below.
+              <br />
+              <span className="text-sm text-gray-500 mt-1">
+                💡 Tip: For testing, you can use the same wallet. For real
+                scenarios, use different wallets (one for upload, one for
+                payment).
+              </span>
             </p>
           </div>
         )}

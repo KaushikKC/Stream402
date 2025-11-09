@@ -4,6 +4,7 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { saveAsset, UPLOAD_DIR, THUMB_DIR, AssetMetadata } from "@/lib/storage";
 import { solanaConfig } from "@/lib/solana-config";
+import { uploadToIPFS } from "@/lib/ipfs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,10 +30,25 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save original file
+    // Save original file locally (for fallback)
     const filename = `${assetId}_${file.name}`;
     const filepath = path.join(UPLOAD_DIR, filename);
     await writeFile(filepath, buffer);
+
+    // Upload to IPFS
+    let ipfsCid: string | undefined;
+    let ipfsUrl: string | undefined;
+
+    try {
+      const fileForIPFS = new File([buffer], file.name, { type: file.type });
+      const ipfsResult = await uploadToIPFS(fileForIPFS, filename);
+      ipfsCid = ipfsResult.cid;
+      ipfsUrl = ipfsResult.url;
+      console.log("Uploaded to IPFS:", { cid: ipfsCid, url: ipfsUrl });
+    } catch (ipfsError) {
+      console.error("IPFS upload failed, using local storage:", ipfsError);
+      // Continue with local storage if IPFS fails
+    }
 
     // For MVP, we'll use the same file as thumbnail (in production, generate a thumbnail)
     const thumbFilename = filename;
@@ -50,6 +66,8 @@ export async function POST(req: NextRequest) {
       recipient,
       filename,
       thumbFilename,
+      ipfsCid,
+      ipfsUrl,
       createdAt: Date.now(),
     };
 
@@ -60,6 +78,8 @@ export async function POST(req: NextRequest) {
       url: `/api/asset/${assetId}`,
       title,
       price: priceNumber,
+      ipfsCid,
+      ipfsUrl,
     });
   } catch (error) {
     console.error("Upload error:", error);

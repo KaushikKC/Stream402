@@ -14,9 +14,124 @@ import {
   getAccount,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
-import { WalletButton } from "@/components/solana/solana-provider";
 
 type ImageItem = { id: string; title: string; thumb: string };
+
+// Component to handle image loading with fallback
+function ImageThumbnail({
+  src,
+  alt,
+  onClick,
+}: {
+  src: string;
+  alt: string;
+  onClick: () => void;
+}) {
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    // Fetch the image and create a blob URL
+    fetch(src)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        setImageSrc(blobUrl);
+      })
+      .catch((err) => {
+        console.error("Error loading image:", src, err);
+        setError(true);
+      });
+  }, [src]);
+
+  useEffect(() => {
+    // Cleanup blob URL on unmount
+    return () => {
+      if (imageSrc && imageSrc.startsWith("blob:")) {
+        URL.revokeObjectURL(imageSrc);
+      }
+    };
+  }, [imageSrc]);
+
+  if (error) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "200px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f9fafb",
+          borderRadius: 4,
+          marginBottom: 8,
+          cursor: "pointer",
+          color: "#6b7280",
+        }}
+        onClick={onClick}
+      >
+        Image not found
+      </div>
+    );
+  }
+
+  if (!imageSrc) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "200px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f9fafb",
+          borderRadius: 4,
+          marginBottom: 8,
+          cursor: "pointer",
+        }}
+        onClick={onClick}
+      >
+        <span>Loading...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "200px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f9fafb",
+        borderRadius: 4,
+        marginBottom: 8,
+        overflow: "hidden",
+        cursor: "pointer",
+      }}
+      onClick={onClick}
+    >
+      <img
+        src={imageSrc}
+        alt={alt}
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          objectFit: "contain",
+          display: "block",
+        }}
+        onError={() => {
+          console.error("Image render error:", src);
+          setError(true);
+        }}
+      />
+    </div>
+  );
+}
 
 type CardState =
   | { status: "idle" }
@@ -51,17 +166,27 @@ export default function ImagesPage() {
 
   useEffect(() => {
     // Fetch images from API
-    fetch("/api/images/list")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.images) {
+    const fetchImages = async () => {
+      try {
+        const res = await fetch("/api/images/list");
+        const data = await res.json();
+        console.log("Fetched images:", data);
+        if (data.images && Array.isArray(data.images)) {
           setImages(data.images);
+        } else {
+          console.warn("No images found or invalid format:", data);
+          setImages([]);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching images:", err);
         setImages([]);
-      });
+      }
+    };
+    fetchImages();
+
+    // Refresh images every 5 seconds to catch new uploads
+    const interval = setInterval(fetchImages, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -178,6 +303,9 @@ export default function ImagesPage() {
       const mint = new PublicKey(paymentRequest.mint);
       const recipient = new PublicKey(paymentRequest.recipient);
       const owner = publicKey;
+
+      // Note: You can use the same wallet for testing, but for real scenarios,
+      // you should use different wallets (one for upload/recipient, one for payment)
 
       const ownerAta = await getAssociatedTokenAddress(mint, owner, false);
       const recipientAta = await getAssociatedTokenAddress(
@@ -362,19 +490,20 @@ export default function ImagesPage() {
                 border: "1px solid #e5e7eb",
                 padding: 8,
                 borderRadius: 6,
+                backgroundColor: "#fff",
               }}
             >
-              <img
+              <ImageThumbnail
                 src={img.thumb}
                 alt={`thumb-${img.id}`}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  display: "block",
-                  borderRadius: 4,
-                }}
                 onClick={() => checkAccess(img.id)}
               />
+              <p
+                className="text-sm font-medium text-gray-700 mb-2"
+                style={{ marginTop: 8 }}
+              >
+                {img.title}
+              </p>
               <div
                 style={{
                   display: "flex",
@@ -393,7 +522,11 @@ export default function ImagesPage() {
                   </button>
                 )}
                 {st.status === "checking" && <span>Checking...</span>}
-                {!connected && st.status !== "authorized" && <WalletButton />}
+                {!connected && st.status !== "authorized" && (
+                  <span className="text-sm text-gray-600">
+                    Connect wallet from navbar to check access
+                  </span>
+                )}
                 {st.status === "requires_payment" && (
                   <>
                     <span style={{ color: "#b45309" }}>
@@ -412,7 +545,9 @@ export default function ImagesPage() {
                         {st.paymentRequest.currency}
                       </button>
                     ) : (
-                      <WalletButton />
+                      <span className="text-sm text-gray-600">
+                        Connect wallet from navbar to pay
+                      </span>
                     )}
                   </>
                 )}
