@@ -102,3 +102,17 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Input text color fix */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea {
+  color: #111827 !important; /* text-gray-900 */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important; /* text-gray-400 */
+}

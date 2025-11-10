@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Link from "next/link";
+import { ReputationBadge } from "@/components/reputation-badge";
 
 interface ProviderStats {
   totalEarnings: number;
@@ -30,6 +31,123 @@ interface ProviderStats {
     amountFormatted: string;
     timestamp: number;
   }>;
+}
+
+interface ReputationNFT {
+  mint: string;
+  score: number;
+  level: string;
+  timestamp: number;
+  transactionSignature?: string;
+  explorerUrl?: string;
+  nftUrl: string;
+}
+
+function ReputationNFTsSection({ wallet }: { wallet: string }) {
+  const [nfts, setNfts] = useState<ReputationNFT[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!wallet) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchNFTs = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/reputation/${wallet}`);
+        if (response.ok) {
+          const data = await response.json();
+          setNfts(data.nfts || []);
+        }
+      } catch (error) {
+        console.error("Error fetching NFTs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNFTs();
+    const interval = setInterval(fetchNFTs, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [wallet]);
+
+  return (
+    <div className="bg-white rounded-lg shadow mb-8">
+      <div className="p-6 border-b">
+        <h2 className="text-xl font-semibold">Reputation NFTs</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          NFTs minted for your reputation milestones
+        </p>
+      </div>
+      <div className="p-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+            <span className="ml-3 text-gray-600">Loading NFTs...</span>
+          </div>
+        ) : nfts.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-3">🎨</div>
+            <p className="text-gray-500 mb-2">No reputation NFTs yet</p>
+            <p className="text-sm text-gray-400">
+              NFTs are automatically minted when you reach reputation milestones
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {nfts.map((nft, index) => (
+              <div
+                key={nft.mint}
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl">🏆</div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">{nft.level}</h3>
+                      <p className="text-xs text-gray-600">
+                        Score: {nft.score}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2 mb-4">
+                  <div className="text-xs text-gray-500">
+                    Minted: {new Date(nft.timestamp).toLocaleDateString()}
+                  </div>
+                  <div className="text-xs font-mono text-gray-600 break-all">
+                    {nft.mint.slice(0, 8)}...{nft.mint.slice(-8)}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <a
+                    href={nft.nftUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-center"
+                  >
+                    View NFT
+                  </a>
+                  {nft.explorerUrl && (
+                    <a
+                      href={nft.explorerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all duration-200"
+                    >
+                      TX
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function ProviderDashboard() {
@@ -174,11 +292,14 @@ export default function ProviderDashboard() {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
             Provider Dashboard
           </h1>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <p className="text-gray-600 font-mono text-sm">
-              {walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}
-            </p>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <p className="text-gray-600 font-mono text-sm">
+                {walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}
+              </p>
+            </div>
+            <ReputationBadge wallet={walletAddress} />
           </div>
         </div>
 
@@ -305,6 +426,9 @@ export default function ProviderDashboard() {
             </table>
           </div>
         </div>
+
+        {/* Reputation NFTs */}
+        <ReputationNFTsSection wallet={walletAddress} />
 
         {/* Recent Payments */}
         <div className="bg-white rounded-lg shadow">

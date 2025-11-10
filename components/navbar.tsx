@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletButton } from "@/components/solana/solana-provider";
 import { usePathname } from "next/navigation";
+import { ReputationBadge } from "./reputation-badge";
 
 export function Navbar() {
   const { connected, publicKey } = useWallet();
@@ -67,12 +68,19 @@ export function Navbar() {
           </div>
           <div className="flex items-center space-x-4">
             {connected && publicKey && (
-              <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-green-700">
-                  {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
-                </span>
-              </div>
+              <>
+                <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-green-700">
+                    {publicKey.toBase58().slice(0, 4)}...
+                    {publicKey.toBase58().slice(-4)}
+                  </span>
+                </div>
+                <ReputationBadge
+                  wallet={publicKey.toBase58()}
+                  className="hidden lg:flex"
+                />
+              </>
             )}
             <WalletButton />
           </div>

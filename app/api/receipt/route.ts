@@ -303,6 +303,34 @@ export async function POST(req: NextRequest) {
       paymentRequestToken,
     });
 
+    // Mint reputation NFT for payer (async, don't block response)
+    console.log(
+      "🔄 Triggering reputation update and NFT minting for payer:",
+      feePayer
+    );
+    try {
+      const { updateReputationAndMintNFT } = await import(
+        "@/lib/reputation-storage"
+      );
+      updateReputationAndMintNFT(feePayer, asset.price)
+        .then(() => {
+          console.log(
+            "✅ Reputation update and NFT minting completed for:",
+            feePayer
+          );
+        })
+        .catch((err) => {
+          console.error("❌ Error minting reputation NFT:", err);
+          console.error(
+            "Error details:",
+            err instanceof Error ? err.message : String(err)
+          );
+          // Don't fail the payment if NFT minting fails
+        });
+    } catch (err) {
+      console.error("❌ Error importing reputation module:", err);
+    }
+
     // Generate access token
     const accessToken = signJwt({ assetId: imageId }, "5m");
 
