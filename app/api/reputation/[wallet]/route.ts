@@ -21,14 +21,14 @@ export async function GET(
     }
 
     // Get or calculate reputation
-    let reputation = getReputation(wallet);
+    let reputation = await getReputation(wallet);
     if (!reputation) {
       // Calculate if doesn't exist
-      reputation = calculateWalletReputation(wallet);
+      reputation = await calculateWalletReputation(wallet);
     }
 
     // Get reputation NFTs
-    const nfts = getReputationNFTs(wallet);
+    const nfts = await getReputationNFTs(wallet);
 
     return NextResponse.json({
       wallet: reputation.wallet,

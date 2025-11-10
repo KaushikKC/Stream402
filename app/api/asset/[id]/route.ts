@@ -31,7 +31,7 @@ export async function GET(
   }
 
   // Not authorized - return 402 payment challenge
-  const asset = getAsset(id);
+  const asset = await getAsset(id);
   if (!asset) {
     return NextResponse.json({ error: "Asset not found" }, { status: 404 });
   }

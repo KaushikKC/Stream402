@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       createdAt: Date.now(),
     };
 
-    saveAsset(metadata);
+    await saveAsset(metadata);
 
     return NextResponse.json({
       assetId,

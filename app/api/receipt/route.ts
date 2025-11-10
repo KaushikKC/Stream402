@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if payment already processed
-    const existingPayment = getPaymentBySignature(signature);
+    const existingPayment = await getPaymentBySignature(signature);
     if (existingPayment) {
       // Payment already verified, return access token
       const accessToken = signJwt({ assetId: imageId }, "5m");
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get asset to verify payment amount
-    const asset = getAsset(imageId);
+    const asset = await getAsset(imageId);
     if (!asset) {
       return NextResponse.json({ error: "asset_not_found" }, { status: 404 });
     }
@@ -294,7 +294,7 @@ export async function POST(req: NextRequest) {
     // In production, you might want to prevent this
 
     // Save payment record
-    savePayment({
+    await savePayment({
       assetId: imageId,
       signature,
       payer: feePayer,

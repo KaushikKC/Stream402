@@ -49,18 +49,46 @@ function writeAssets(assets: AssetMetadata[]): void {
   }
 }
 
-export function saveAsset(metadata: AssetMetadata): void {
+export async function saveAsset(metadata: AssetMetadata): Promise<void> {
+  // Try database first, fallback to local storage
+  try {
+    const { saveAssetToDB } = await import("./storage-db");
+    await saveAssetToDB(metadata);
+    return;
+  } catch (error) {
+    console.warn("Database save failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   const assets = readAssets();
   assets.push(metadata);
   writeAssets(assets);
 }
 
-export function getAsset(id: string): AssetMetadata | null {
+export async function getAsset(id: string): Promise<AssetMetadata | null> {
+  // Try database first, fallback to local storage
+  try {
+    const { getAssetFromDB } = await import("./storage-db");
+    return await getAssetFromDB(id);
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   const assets = readAssets();
   return assets.find((a) => a.id === id) || null;
 }
 
-export function getAllAssets(): AssetMetadata[] {
+export async function getAllAssets(): Promise<AssetMetadata[]> {
+  // Try database first, fallback to local storage
+  try {
+    const { getAllAssetsFromDB } = await import("./storage-db");
+    return await getAllAssetsFromDB();
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   return readAssets();
 }
 
@@ -92,18 +120,52 @@ function writePayments(payments: PaymentRecord[]): void {
   }
 }
 
-export function savePayment(payment: PaymentRecord): void {
+export async function savePayment(payment: PaymentRecord): Promise<void> {
+  // Try database first, fallback to local storage
+  try {
+    const { savePaymentToDB } = await import("./storage-db");
+    await savePaymentToDB(payment);
+    return;
+  } catch (error) {
+    console.warn("Database save failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   const payments = readPayments();
   payments.push(payment);
   writePayments(payments);
 }
 
-export function getPaymentBySignature(signature: string): PaymentRecord | null {
+export async function getPaymentBySignature(
+  signature: string
+): Promise<PaymentRecord | null> {
+  // Try database first, fallback to local storage
+  try {
+    const { getAllPaymentsFromDB } = await import("./storage-db");
+    const payments = await getAllPaymentsFromDB();
+    return payments.find((p) => p.signature === signature) || null;
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   const payments = readPayments();
   return payments.find((p) => p.signature === signature) || null;
 }
 
-export function getPaymentByAssetId(assetId: string): PaymentRecord | null {
+export async function getPaymentByAssetId(
+  assetId: string
+): Promise<PaymentRecord | null> {
+  // Try database first, fallback to local storage
+  try {
+    const { getAllPaymentsFromDB } = await import("./storage-db");
+    const payments = await getAllPaymentsFromDB();
+    return payments.find((p) => p.assetId === assetId) || null;
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   const payments = readPayments();
   return payments.find((p) => p.assetId === assetId) || null;
 }

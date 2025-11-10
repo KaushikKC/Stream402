@@ -36,7 +36,7 @@ export async function GET(
   }
 
   // Get asset
-  const asset = getAsset(id);
+  const asset = await getAsset(id);
   if (!asset) {
     return NextResponse.json({ error: "Asset not found" }, { status: 404 });
   }

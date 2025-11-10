@@ -64,6 +64,16 @@ export function Navbar() {
               >
                 Dashboard
               </Link>
+              <Link
+                href="/agent"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  pathname === "/agent"
+                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
+              >
+                🤖 Agent
+              </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">

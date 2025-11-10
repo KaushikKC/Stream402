@@ -49,8 +49,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const assets = getAllAssets();
-    const payments = readPayments();
+    const assets = await getAllAssets();
+    const payments = await readPayments();
 
     // Filter assets by recipient
     const providerAssets = assets.filter(

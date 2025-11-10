@@ -11,14 +11,22 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const asset = getAsset(id);
+  const asset = await getAsset(id);
   if (!asset) {
     console.error("Asset not found for id:", id);
     return NextResponse.json({ error: "Asset not found" }, { status: 404 });
   }
 
-  // For thumbnails, we always want to serve low-res version
-  // Don't redirect to IPFS URL for thumbnails - we need to serve the low-res version
+  // If IPFS URL is available, use it for the thumbnail
+  // Note: For true low-res thumbnails, we'd need to upload thumbnails to IPFS separately
+  // For now, we'll use the IPFS URL if available, otherwise fall back to local files
+  if (asset.ipfsUrl) {
+    console.log("Using IPFS URL for thumbnail:", asset.ipfsUrl);
+    // Redirect to IPFS URL - this will serve the full image from IPFS
+    // In production, you might want to create and upload thumbnails to IPFS separately
+    return NextResponse.redirect(asset.ipfsUrl, 302);
+  }
+
   // Fallback to local file - serve thumbnail (low-res) if available, otherwise original
   try {
     // Try to use thumbnail first (low-resolution)
@@ -32,7 +40,7 @@ export async function GET(
         await access(thumbPath, constants.F_OK);
         filepath = thumbPath;
         isThumbnail = true;
-        console.log("Using thumbnail:", asset.thumbFilename);
+        console.log("Using local thumbnail:", asset.thumbFilename);
       } catch {
         // Thumbnail doesn't exist, fall back to original
         filepath = path.resolve(UPLOAD_DIR, asset.filename);

@@ -162,7 +162,7 @@ export async function updateReputationAndMintNFT(
     });
 
     // Save reputation
-    saveReputation(reputation);
+    await saveReputation(reputation);
 
     // Check if we should mint a new NFT
     // Mint on first payment, every 10+ point increase, or level change
@@ -265,12 +265,11 @@ export async function updateReputationAndMintNFT(
 
     if (nftResult) {
       // Save NFT record
-      saveReputationNFT({
+      await saveReputationNFT({
         wallet,
         mint: nftResult.mint,
         score: reputation.score,
         level: reputation.level,
-        metadata,
         timestamp: Date.now(),
         transactionSignature: nftResult.signature,
       });
