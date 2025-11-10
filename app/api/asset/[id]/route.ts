@@ -3,6 +3,10 @@ import { getAsset } from "@/lib/storage";
 import { verifyJwt } from "@/lib/jwt";
 import { solanaConfig } from "@/lib/solana-config";
 import { v4 as uuidv4 } from "uuid";
+import {
+  createPaymentChallenge,
+  format402Response,
+} from "@/lib/payment-challenge";
 
 export async function GET(
   req: NextRequest,
@@ -34,25 +38,31 @@ export async function GET(
 
   const paymentRequestToken = uuidv4(); // In production, this should be a signed token
 
-  const paymentRequest = {
-    imageId: id,
-    network: `solana:${solanaConfig.network}`,
-    currency: asset.currency,
-    decimals: asset.decimals,
-    amount: asset.price,
-    mint: asset.mint,
-    recipient: asset.recipient,
-  };
-
-  return new NextResponse(
-    JSON.stringify({
-      error: "Payment Required",
-      paymentRequest,
-      paymentRequestToken,
-    }),
-    {
-      status: 402,
-      headers: { "Content-Type": "application/json" },
-    }
+  // Create standardized payment challenge
+  const challenge = createPaymentChallenge(
+    id,
+    asset.price,
+    asset.decimals,
+    asset.currency,
+    asset.mint,
+    asset.recipient,
+    `solana:${solanaConfig.network}`,
+    paymentRequestToken,
+    300 // 5 minutes expiration
   );
+
+  // Format response according to X402 standard
+  const response = format402Response({
+    ...challenge,
+    description: `Payment required to access ${asset.title}`,
+    metadata: {
+      title: asset.title,
+      createdAt: asset.createdAt,
+    },
+  });
+
+  return new NextResponse(JSON.stringify(response), {
+    status: 402,
+    headers: { "Content-Type": "application/json" },
+  });
 }

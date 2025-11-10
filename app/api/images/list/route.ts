@@ -8,8 +8,11 @@ export async function GET() {
     const images = assets.map((asset) => ({
       id: asset.id,
       title: asset.title,
-      thumb: asset.ipfsUrl || `/api/thumb/${asset.id}`, // Use IPFS URL if available, fallback to API route
-      ipfsUrl: asset.ipfsUrl,
+      // Always use thumbnail API route for low-res previews (not IPFS URL)
+      // IPFS URL would be full resolution, we want thumbnails for preview
+      thumb: `/api/thumb/${asset.id}`,
+      ipfsUrl: asset.ipfsUrl, // Full resolution IPFS URL (for after payment)
+      tags: asset.tags || [],
     }));
 
     console.log("Returning images:", images);

@@ -3,6 +3,7 @@ import { Connection, PublicKey, TokenBalance } from "@solana/web3.js";
 import { solanaConfig } from "@/lib/solana-config";
 import { getAsset, savePayment, getPaymentBySignature } from "@/lib/storage";
 import { signJwt } from "@/lib/jwt";
+import { isChallengeExpired } from "@/lib/payment-challenge";
 
 function toBase58FromAccountKey(key: unknown): string {
   if (typeof key === "object" && key !== null) {
@@ -22,14 +23,29 @@ function toBase58FromAccountKey(key: unknown): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { signature, paymentRequestToken, imageId } = (await req.json()) as {
-      signature: string;
-      paymentRequestToken: string;
-      imageId: string;
-    };
+    const { signature, paymentRequestToken, imageId, challenge } =
+      (await req.json()) as {
+        signature: string;
+        paymentRequestToken: string;
+        imageId: string;
+        challenge?: {
+          expiresAt?: number;
+        };
+      };
 
     if (!signature || !paymentRequestToken || !imageId) {
       return NextResponse.json({ error: "bad_request" }, { status: 400 });
+    }
+
+    // Validate challenge expiration if provided
+    if (challenge?.expiresAt) {
+      const now = Math.floor(Date.now() / 1000);
+      if (challenge.expiresAt < now) {
+        return NextResponse.json(
+          { error: "challenge_expired", expiresAt: challenge.expiresAt },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if payment already processed

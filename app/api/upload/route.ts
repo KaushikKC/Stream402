@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { saveAsset, UPLOAD_DIR, THUMB_DIR, AssetMetadata } from "@/lib/storage";
 import { solanaConfig } from "@/lib/solana-config";
 import { uploadToIPFS } from "@/lib/ipfs";
+import { generateThumbnail } from "@/lib/thumbnail";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +15,12 @@ export async function POST(req: NextRequest) {
     const price = (formData.get("price") as string) || "0.01";
     const recipient =
       (formData.get("recipient") as string) || solanaConfig.recipient;
+    const tagsInput = (formData.get("tags") as string) || "";
+    // Parse tags from comma-separated string
+    const tags = tagsInput
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -35,6 +42,16 @@ export async function POST(req: NextRequest) {
     const filepath = path.join(UPLOAD_DIR, filename);
     await writeFile(filepath, buffer);
 
+    // Generate low-resolution thumbnail
+    let thumbFilename: string;
+    try {
+      thumbFilename = await generateThumbnail(buffer, filename, 400, 400, 70);
+      console.log("Generated thumbnail:", thumbFilename);
+    } catch (thumbError) {
+      console.error("Thumbnail generation failed, using original:", thumbError);
+      thumbFilename = filename; // Fallback to original
+    }
+
     // Upload to IPFS
     let ipfsCid: string | undefined;
     let ipfsUrl: string | undefined;
@@ -49,9 +66,6 @@ export async function POST(req: NextRequest) {
       console.error("IPFS upload failed, using local storage:", ipfsError);
       // Continue with local storage if IPFS fails
     }
-
-    // For MVP, we'll use the same file as thumbnail (in production, generate a thumbnail)
-    const thumbFilename = filename;
 
     const priceNumber = parseFloat(price);
     const priceInSmallestUnit = BigInt(Math.floor(priceNumber * 1_000_000)); // 6 decimals for USDC
@@ -68,6 +82,7 @@ export async function POST(req: NextRequest) {
       thumbFilename,
       ipfsCid,
       ipfsUrl,
+      tags: tags.length > 0 ? tags : undefined,
       createdAt: Date.now(),
     };
 

@@ -21,6 +21,7 @@ export interface AssetMetadata {
   thumbFilename?: string;
   ipfsCid?: string; // IPFS Content Identifier
   ipfsUrl?: string; // IPFS URL for the image
+  tags?: string[]; // Tags for search functionality
   createdAt: number;
 }
 
@@ -72,7 +73,7 @@ export interface PaymentRecord {
   paymentRequestToken: string;
 }
 
-function readPayments(): PaymentRecord[] {
+export function readPayments(): PaymentRecord[] {
   try {
     if (fs.existsSync(PAYMENTS_FILE)) {
       return fs.readJsonSync(PAYMENTS_FILE);

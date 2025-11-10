@@ -3,7 +3,7 @@ import { getAsset } from "@/lib/storage";
 import { readFile, access } from "fs/promises";
 import { constants } from "fs";
 import path from "path";
-import { UPLOAD_DIR } from "@/lib/storage";
+import { UPLOAD_DIR, THUMB_DIR } from "@/lib/storage";
 
 export async function GET(
   req: NextRequest,
@@ -17,23 +17,40 @@ export async function GET(
     return NextResponse.json({ error: "Asset not found" }, { status: 404 });
   }
 
-  // If IPFS URL is available, redirect to it
-  if (asset.ipfsUrl) {
-    console.log("Redirecting to IPFS URL:", asset.ipfsUrl);
-    return NextResponse.redirect(asset.ipfsUrl, 302);
-  }
-
-  // Fallback to local file
+  // For thumbnails, we always want to serve low-res version
+  // Don't redirect to IPFS URL for thumbnails - we need to serve the low-res version
+  // Fallback to local file - serve thumbnail (low-res) if available, otherwise original
   try {
-    // For MVP, serve the original file as thumbnail
-    // In production, you'd generate actual thumbnails
-    // Use resolve to get absolute path
-    const filepath = path.resolve(UPLOAD_DIR, asset.filename);
+    // Try to use thumbnail first (low-resolution)
+    let filepath: string;
+    let isThumbnail = false;
+
+    if (asset.thumbFilename && asset.thumbFilename !== asset.filename) {
+      // Try thumbnail first
+      const thumbPath = path.resolve(THUMB_DIR, asset.thumbFilename);
+      try {
+        await access(thumbPath, constants.F_OK);
+        filepath = thumbPath;
+        isThumbnail = true;
+        console.log("Using thumbnail:", asset.thumbFilename);
+      } catch {
+        // Thumbnail doesn't exist, fall back to original
+        filepath = path.resolve(UPLOAD_DIR, asset.filename);
+        console.log("Thumbnail not found, using original:", asset.filename);
+      }
+    } else {
+      // No separate thumbnail, use original
+      filepath = path.resolve(UPLOAD_DIR, asset.filename);
+    }
+
     console.log("Attempting to read thumbnail from local storage:", {
       id,
       filename: asset.filename,
+      thumbFilename: asset.thumbFilename,
       filepath,
+      isThumbnail,
       uploadDir: UPLOAD_DIR,
+      thumbDir: THUMB_DIR,
       cwd: process.cwd(),
     });
 
@@ -43,6 +60,7 @@ export async function GET(
     } catch (accessError) {
       console.error("File does not exist at:", filepath);
       console.error("Upload dir:", UPLOAD_DIR);
+      console.error("Thumb dir:", THUMB_DIR);
       console.error("Process cwd:", process.cwd());
       console.error("Access error:", accessError);
       return NextResponse.json(
@@ -53,19 +71,30 @@ export async function GET(
 
     const fileBuffer = await readFile(filepath);
 
+    // Determine content type
+    // If it's a thumbnail (converted to JPEG), use image/jpeg
+    // Otherwise use the original file extension
     const ext = path.extname(asset.filename).toLowerCase();
-    const contentType =
-      ext === ".png"
-        ? "image/png"
-        : ext === ".jpg" || ext === ".jpeg"
-        ? "image/jpeg"
-        : ext === ".gif"
-        ? "image/gif"
-        : ext === ".webp"
-        ? "image/webp"
-        : ext === ".svg"
-        ? "image/svg+xml"
-        : "application/octet-stream";
+    let contentType: string;
+
+    if (isThumbnail) {
+      // Thumbnails are converted to JPEG, so always use image/jpeg
+      contentType = "image/jpeg";
+    } else {
+      // Use original file type
+      contentType =
+        ext === ".png"
+          ? "image/png"
+          : ext === ".jpg" || ext === ".jpeg"
+          ? "image/jpeg"
+          : ext === ".gif"
+          ? "image/gif"
+          : ext === ".webp"
+          ? "image/webp"
+          : ext === ".svg"
+          ? "image/svg+xml"
+          : "application/octet-stream";
+    }
 
     // Return image with proper headers
     return new NextResponse(fileBuffer, {
