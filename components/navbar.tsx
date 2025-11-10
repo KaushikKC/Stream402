@@ -20,7 +20,7 @@ export function Navbar() {
                 <span className="text-white font-bold text-sm">x</span>
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                x402 Image
+                Stream402
               </span>
             </Link>
             <div className="ml-10 flex items-center space-x-1">

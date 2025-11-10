@@ -1,9 +1,9 @@
 {
-  "name": "x402-template",
+  "name": "stream402",
   "version": "0.1.0",
   "private": true,
-  "displayName": "X402 Next.js",
-  "description": "Next.js Solana starter with X402 payment protocol integration",
+  "displayName": "Stream402",
+  "description": "Stream402 - Monetize your content with Solana payments using the x402 protocol",
   "usecase": "Payments",
   "keywords": [
     "solana",

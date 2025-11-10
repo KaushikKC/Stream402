@@ -7,7 +7,7 @@ export default function Home() {
         <div className="w-full text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              x402 Image Payment
+              Stream402
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Monetize your images with Solana payments. Upload, tag, and sell

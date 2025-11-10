@@ -1,4 +1,4 @@
-# TODO List - X402 Image Payment App
+# TODO List - Stream402
 
 ## ✅ Completed Tasks
 

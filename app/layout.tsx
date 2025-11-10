@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Solana x402 Image Payment App",
+  title: "Stream402 - Monetize Content with Solana Payments",
   description:
-    "Upload and access images with Solana payments using the x402 protocol.",
+    "Stream402 - Upload and access images with Solana payments using the x402 protocol.",
 };
 
 export default function RootLayout({

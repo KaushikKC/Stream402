@@ -1,6 +1,6 @@
-# X402 Solana Image Payment App
+# Stream402
 
-**A Next.js app implementing the X402 payment protocol for image access using Solana DevNet.**
+**Stream402 - A Next.js app implementing the X402 payment protocol for image access using Solana DevNet.**
 
 This app demonstrates a complete implementation of the X402 payment protocol where users can upload images and access them by paying with USDC on Solana DevNet.
 
