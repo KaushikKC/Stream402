@@ -3,7 +3,7 @@
  * Handles query parsing, asset discovery, and automatic payment
  */
 
-import { getAllAssets } from "./storage";
+import { getAllAssets, AssetMetadata } from "./storage";
 
 export interface AgentRequest {
   query: string;
@@ -57,21 +57,23 @@ export function parseQuery(query: string): string[] {
 /**
  * Search assets by keywords extracted from query
  */
-export function searchAssetsByQuery(query: string): Array<{
-  id: string;
-  title: string;
-  tags: string[];
-  price: number;
-  recipient: string;
-  matchScore: number;
-}> {
+export async function searchAssetsByQuery(query: string): Promise<
+  Array<{
+    id: string;
+    title: string;
+    tags: string[];
+    price: number;
+    recipient: string;
+    matchScore: number;
+  }>
+> {
   const keywords = parseQuery(query);
-  const assets = getAllAssets();
+  const assets = await getAllAssets();
 
   const results = assets
-    .map((asset) => {
+    .map((asset: AssetMetadata) => {
       const titleLower = asset.title.toLowerCase();
-      const tagsLower = asset.tags?.map((t) => t.toLowerCase()) || [];
+      const tagsLower = asset.tags?.map((t: string) => t.toLowerCase()) || [];
       const allText = [titleLower, ...tagsLower].join(" ");
 
       // Calculate match score
@@ -80,7 +82,7 @@ export function searchAssetsByQuery(query: string): Array<{
         if (titleLower.includes(keyword)) {
           matchScore += 3; // Title matches are more important
         }
-        if (tagsLower.some((tag) => tag.includes(keyword))) {
+        if (tagsLower.some((tag: string) => tag.includes(keyword))) {
           matchScore += 2; // Tag matches
         }
         if (allText.includes(keyword)) {
@@ -97,8 +99,11 @@ export function searchAssetsByQuery(query: string): Array<{
         matchScore,
       };
     })
-    .filter((asset) => asset.matchScore > 0)
-    .sort((a, b) => b.matchScore - a.matchScore);
+    .filter((asset: { matchScore: number }) => asset.matchScore > 0)
+    .sort(
+      (a: { matchScore: number }, b: { matchScore: number }) =>
+        b.matchScore - a.matchScore
+    );
 
   return results;
 }

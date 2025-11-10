@@ -5,7 +5,12 @@
 
 import fs from "fs-extra";
 import path from "path";
-import { readPayments, getAllAssets, PaymentRecord } from "./storage";
+import {
+  readPayments,
+  getAllAssets,
+  PaymentRecord,
+  AssetMetadata,
+} from "./storage";
 import {
   calculateReputationScore,
   getReputationLevel,
@@ -32,7 +37,8 @@ export interface ReputationData {
   [wallet: string]: ReputationScore;
 }
 
-export function readReputations(): ReputationData {
+export async function readReputations(): Promise<ReputationData> {
+  // Fallback to local storage (database doesn't have getAllReputations)
   try {
     if (fs.existsSync(REPUTATION_FILE)) {
       return fs.readJsonSync(REPUTATION_FILE);
@@ -43,9 +49,21 @@ export function readReputations(): ReputationData {
   return {};
 }
 
-export function saveReputation(reputation: ReputationScore): void {
+export async function saveReputation(
+  reputation: ReputationScore
+): Promise<void> {
+  // Try database first, fallback to local storage
   try {
-    const reputations = readReputations();
+    const { saveReputationToDB } = await import("./storage-db");
+    await saveReputationToDB(reputation);
+    return;
+  } catch (error) {
+    console.warn("Database save failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
+  try {
+    const reputations = await readReputations();
     reputations[reputation.wallet] = reputation;
     fs.writeJsonSync(REPUTATION_FILE, reputations, { spaces: 2 });
   } catch (error) {
@@ -53,12 +71,32 @@ export function saveReputation(reputation: ReputationScore): void {
   }
 }
 
-export function getReputation(wallet: string): ReputationScore | null {
-  const reputations = readReputations();
+export async function getReputation(
+  wallet: string
+): Promise<ReputationScore | null> {
+  // Try database first, fallback to local storage
+  try {
+    const { getReputationFromDB } = await import("./storage-db");
+    return await getReputationFromDB(wallet);
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
+  const reputations = await readReputations();
   return reputations[wallet] || null;
 }
 
-export function readReputationNFTs(): ReputationNFTRecord[] {
+export async function readReputationNFTs(): Promise<ReputationNFTRecord[]> {
+  // Try database first, fallback to local storage
+  try {
+    // Database doesn't have getAllReputationNFTs, so we'll use local storage
+    // Individual wallet queries use getReputationNFTsFromDB
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
   try {
     if (fs.existsSync(REPUTATION_NFT_FILE)) {
       return fs.readJsonSync(REPUTATION_NFT_FILE);
@@ -69,9 +107,21 @@ export function readReputationNFTs(): ReputationNFTRecord[] {
   return [];
 }
 
-export function saveReputationNFT(nft: ReputationNFTRecord): void {
+export async function saveReputationNFT(
+  nft: ReputationNFTRecord
+): Promise<void> {
+  // Try database first, fallback to local storage
   try {
-    const nfts = readReputationNFTs();
+    const { saveReputationNFTToDB } = await import("./storage-db");
+    await saveReputationNFTToDB(nft);
+    return;
+  } catch (error) {
+    console.warn("Database save failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
+  try {
+    const nfts = await readReputationNFTs();
     nfts.push(nft);
     fs.writeJsonSync(REPUTATION_NFT_FILE, nfts, { spaces: 2 });
   } catch (error) {
@@ -79,8 +129,19 @@ export function saveReputationNFT(nft: ReputationNFTRecord): void {
   }
 }
 
-export function getReputationNFTs(wallet: string): ReputationNFTRecord[] {
-  const nfts = readReputationNFTs();
+export async function getReputationNFTs(
+  wallet: string
+): Promise<ReputationNFTRecord[]> {
+  // Try database first, fallback to local storage
+  try {
+    const { getReputationNFTsFromDB } = await import("./storage-db");
+    return await getReputationNFTsFromDB(wallet);
+  } catch (error) {
+    console.warn("Database get failed, using local storage:", error);
+  }
+
+  // Fallback to local storage
+  const nfts = await readReputationNFTs();
   return nfts.filter(
     (nft) => nft.wallet.toLowerCase() === wallet.toLowerCase()
   );
@@ -89,9 +150,11 @@ export function getReputationNFTs(wallet: string): ReputationNFTRecord[] {
 /**
  * Calculate reputation for a wallet based on all payments
  */
-export function calculateWalletReputation(wallet: string): ReputationScore {
-  const payments = readPayments();
-  const assets = getAllAssets();
+export async function calculateWalletReputation(
+  wallet: string
+): Promise<ReputationScore> {
+  const payments = await readPayments();
+  const assets = await getAllAssets();
 
   // Filter payments for this wallet (as payer)
   const walletPayments = payments.filter(
@@ -106,10 +169,11 @@ export function calculateWalletReputation(wallet: string): ReputationScore {
 
   // Calculate total earnings (as provider)
   const providerAssets = assets.filter(
-    (asset) => asset.recipient.toLowerCase() === wallet.toLowerCase()
+    (asset: AssetMetadata) =>
+      asset.recipient.toLowerCase() === wallet.toLowerCase()
   );
   const providerPayments = payments.filter((p: PaymentRecord) =>
-    providerAssets.some((asset) => asset.id === p.assetId)
+    providerAssets.some((asset: AssetMetadata) => asset.id === p.assetId)
   );
   const totalEarnings = providerPayments.reduce(
     (sum: number, p: PaymentRecord) => sum + p.amount,
@@ -148,11 +212,11 @@ export async function updateReputationAndMintNFT(
 
     // IMPORTANT: Get existing reputation BEFORE calculating new one
     // This is needed to compare old vs new for NFT minting
-    const existingReputation = getReputation(wallet);
+    const existingReputation = await getReputation(wallet);
     console.log("📊 Existing reputation:", existingReputation);
 
     // Calculate updated reputation
-    const reputation = calculateWalletReputation(wallet);
+    const reputation = await calculateWalletReputation(wallet);
     console.log("📊 New reputation:", {
       score: reputation.score,
       level: reputation.level,
@@ -272,6 +336,7 @@ export async function updateReputationAndMintNFT(
         level: reputation.level,
         timestamp: Date.now(),
         transactionSignature: nftResult.signature,
+        metadata: metadata, // Include metadata in NFT record
       });
 
       console.log("✅ Reputation NFT minted successfully!", {

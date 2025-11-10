@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const matches = searchAssetsByQuery(query);
+    const matches = await searchAssetsByQuery(query);
 
     return NextResponse.json({
       success: true,
