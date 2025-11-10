@@ -27,10 +27,27 @@ const REPUTATION_NFT_FILE = path.join(
   "reputation-nfts.json"
 );
 
-// Ensure data directory exists
+// Check if we're in a serverless environment (Vercel, AWS Lambda, etc.)
+const isServerless =
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.NEXT_RUNTIME === "nodejs";
+
+// Ensure data directory exists (only in non-serverless environments)
+// In serverless, we use Supabase for storage
 const DATA_DIR = path.join(process.cwd(), "data");
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+if (!isServerless) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch (error) {
+    // Silently fail in serverless environments
+    console.warn(
+      "Could not create data directory (serverless environment):",
+      error
+    );
+  }
 }
 
 export interface ReputationData {

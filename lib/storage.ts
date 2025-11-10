@@ -5,9 +5,26 @@ import { v4 as uuidv4 } from "uuid";
 const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const THUMB_DIR = path.join(process.cwd(), "uploads", "thumbs");
 
-// Ensure directories exist
-fs.ensureDirSync(UPLOAD_DIR);
-fs.ensureDirSync(THUMB_DIR);
+// Check if we're in a serverless environment (Vercel, AWS Lambda, etc.)
+const isServerless =
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.NEXT_RUNTIME === "nodejs";
+
+// Ensure directories exist (only in non-serverless environments)
+// In serverless, we use Supabase/IPFS for storage
+if (!isServerless) {
+  try {
+    fs.ensureDirSync(UPLOAD_DIR);
+    fs.ensureDirSync(THUMB_DIR);
+  } catch (error) {
+    // Silently fail in serverless environments
+    console.warn(
+      "Could not create upload directories (serverless environment):",
+      error
+    );
+  }
+}
 
 export interface AssetMetadata {
   id: string;
@@ -28,7 +45,18 @@ export interface AssetMetadata {
 const ASSETS_FILE = path.join(process.cwd(), "data", "assets.json");
 const PAYMENTS_FILE = path.join(process.cwd(), "data", "payments.json");
 
-fs.ensureDirSync(path.join(process.cwd(), "data"));
+// Ensure data directory exists (only in non-serverless environments)
+if (!isServerless) {
+  try {
+    fs.ensureDirSync(path.join(process.cwd(), "data"));
+  } catch (error) {
+    // Silently fail in serverless environments
+    console.warn(
+      "Could not create data directory (serverless environment):",
+      error
+    );
+  }
+}
 
 function readAssets(): AssetMetadata[] {
   try {
