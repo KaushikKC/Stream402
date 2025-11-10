@@ -33,8 +33,17 @@ const nextConfig: NextConfig = {
         path: false,
       };
     }
+
+    // Exclude SDK directory from Next.js build
+    config.externals = config.externals || [];
+    config.externals.push({
+      "stream402-sdk": "commonjs stream402-sdk",
+    });
+
     return config;
   },
+  // Exclude SDK directory from page compilation
+  pageExtensions: ["tsx", "ts", "jsx", "js"],
 };
 
 export default nextConfig;
