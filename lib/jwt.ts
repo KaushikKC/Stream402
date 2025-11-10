@@ -1,13 +1,13 @@
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 
-const JWT_SECRET =
+const JWT_SECRET: string =
   process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 export function signJwt<T extends Record<string, unknown>>(
   payload: T,
-  expiresIn: string = "4m"
+  expiresIn: string | number = "4m"
 ): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn } as jwt.SignOptions);
 }
 
 export function verifyJwt<T extends Record<string, unknown>>(
