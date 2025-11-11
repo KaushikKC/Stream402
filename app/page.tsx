@@ -22,8 +22,9 @@ export default function Home() {
               Stream402
             </h1>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light">
-              Monetize your images with Solana payments. Upload, tag, and sell
-              your content using the x402 protocol on Solana DevNet.
+              Monetize your content with Solana payments. Upload, tag, and sell
+              your images, videos, audio, and all types of digital content using
+              the x402 protocol on Solana DevNet.
             </p>
           </div>
 
@@ -46,7 +47,7 @@ export default function Home() {
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                   />
                 </svg>
-                <span>Upload Image</span>
+                <span>Upload Content</span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-[#14966c] to-[#0d6b4f] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
@@ -69,7 +70,7 @@ export default function Home() {
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <span>Browse Images</span>
+                <span>Browse Content</span>
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-[#0d6b4f] to-[#14966c] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>

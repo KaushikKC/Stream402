@@ -198,6 +198,11 @@ textarea::placeholder {
   padding: 0.5rem 1rem !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 0 15px rgba(29, 215, 155, 0.3) !important;
+  margin-bottom: 10px;
+}
+
+.wallet-adapter-modal-list {
+  padding: 10px !important;
 }
 
 .wallet-adapter-button:hover {

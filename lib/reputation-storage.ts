@@ -246,7 +246,8 @@ export async function updateReputationAndMintNFT(
     await saveReputation(reputation);
 
     // Check if we should mint a new NFT
-    // Mint on first payment, every 10+ point increase, or level change
+    // DEMO-FRIENDLY: Mint on every payment for easy demo
+    // (In production, you might want: first payment OR score increase >= 10 OR level change)
     const isFirstPayment = !existingReputation;
     const scoreIncrease = existingReputation
       ? reputation.score - existingReputation.score
@@ -255,14 +256,16 @@ export async function updateReputationAndMintNFT(
       ? reputation.level !== existingReputation.level
       : true; // First payment always has a level
 
+    // DEMO MODE: Mint on every payment (score increase > 0 means a new payment was made)
+    // This ensures every payment triggers an NFT mint for demo purposes
     const shouldMintNFT =
       isFirstPayment || // First payment - always mint
-      scoreIncrease >= 10 || // Score increased by 10+
+      scoreIncrease > 0 || // Any score increase (every payment adds points)
       levelChanged; // Level changed
 
     const reason = isFirstPayment
       ? "first_payment"
-      : scoreIncrease >= 10
+      : scoreIncrease > 0
       ? "score_increase"
       : levelChanged
       ? "level_change"
@@ -293,6 +296,11 @@ export async function updateReputationAndMintNFT(
         scoreIncrease,
         levelChanged,
         reason,
+        criteria: "Need: first payment OR score increase > 0 OR level change",
+        currentScore: reputation.score,
+        previousScore: existingReputation?.score || 0,
+        currentLevel: reputation.level,
+        previousLevel: existingReputation?.level || "none",
       });
       return;
     }

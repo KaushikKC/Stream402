@@ -16,9 +16,9 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-[#1dd79b] to-[#14966c] rounded-lg flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-[0_0_15px_rgba(29,215,155,0.5)]">
+              {/* <div className="w-8 h-8 bg-gradient-to-br from-[#1dd79b] to-[#14966c] rounded-lg flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-[0_0_15px_rgba(29,215,155,0.5)]">
                 <span className="text-black font-bold text-sm">x</span>
-              </div>
+              </div> */}
               <span className="text-xl font-bold bg-gradient-to-r from-[#1dd79b] to-[#14966c] bg-clip-text text-transparent">
                 Stream402
               </span>

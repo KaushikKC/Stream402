@@ -65,7 +65,7 @@ function ImageThumbnail({
   if (error) {
     return (
       <div
-        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black rounded-xl mb-3 cursor-pointer hover:from-gray-800 hover:to-gray-900 transition-all duration-300 border border-gray-700"
+        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-sm rounded-xl mb-3 cursor-pointer hover:from-gray-800/70 hover:to-gray-900/70 transition-all duration-300 border border-gray-700/50"
         onClick={onClick}
       >
         <div className="text-center">
@@ -91,7 +91,7 @@ function ImageThumbnail({
   if (loading || !imageSrc) {
     return (
       <div
-        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black rounded-xl mb-3 cursor-pointer border border-gray-700 animate-pulse"
+        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-sm rounded-xl mb-3 cursor-pointer border border-gray-700/50 animate-pulse"
         onClick={onClick}
       >
         <div className="text-center">
@@ -123,7 +123,7 @@ function ImageThumbnail({
 
   return (
     <div
-      className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black rounded-xl mb-3 overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 border border-gray-700"
+      className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-sm rounded-xl mb-3 overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 border border-gray-700/50"
       onClick={onClick}
     >
       <img
@@ -701,15 +701,15 @@ export default function ImagesPage() {
             return (
               <div
                 key={img.id}
-                className="bg-black/80 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-xl hover:shadow-[0_0_20px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/20 overflow-hidden group hover:-translate-y-1"
+                className="relative bg-gradient-to-br from-black/30 via-black/20 to-black/30 backdrop-blur-2xl rounded-3xl shadow-2xl hover:shadow-[0_0_40px_rgba(29,215,155,0.5)] transition-all duration-500 border border-[#1dd79b]/40 overflow-hidden group hover:-translate-y-2 hover:scale-[1.02] before:absolute before:inset-0 before:bg-gradient-to-br before:from-[#1dd79b]/5 before:via-transparent before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500"
               >
                 <ImageThumbnail
                   src={img.thumb}
                   alt={`thumb-${img.id}`}
                   onClick={() => checkAccess(img.id)}
                 />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-200 mb-2 line-clamp-2">
+                <div className="p-5 relative z-10">
+                  <h3 className="text-lg font-semibold text-gray-100 mb-3 line-clamp-2 group-hover:text-[#1dd79b] transition-colors duration-300">
                     {img.title}
                   </h3>
                   {img.tags && img.tags.length > 0 && (
