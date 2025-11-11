@@ -35,6 +35,7 @@ export const TABLES = {
   PAYMENTS: "payments",
   REPUTATION: "reputation",
   REPUTATION_NFTS: "reputation_nfts",
+  AGENT_WALLETS: "agent_wallets",
 } as const;
 
 /**

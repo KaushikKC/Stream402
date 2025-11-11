@@ -102,3 +102,33 @@ CREATE POLICY "Allow public upsert to reputation" ON reputation
 CREATE POLICY "Allow public insert to reputation_nfts" ON reputation_nfts
   FOR INSERT WITH CHECK (true);
 
+-- Agent Wallets table
+CREATE TABLE IF NOT EXISTS agent_wallets (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  agent_address TEXT NOT NULL UNIQUE,
+  encrypted_private_key TEXT NOT NULL,
+  created_at BIGINT NOT NULL,
+  balance BIGINT DEFAULT 0,
+  total_spent BIGINT DEFAULT 0,
+  total_purchases INTEGER DEFAULT 0,
+  created_at_db TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes for agent wallets
+CREATE INDEX IF NOT EXISTS idx_agent_wallets_user_id ON agent_wallets(user_id);
+CREATE INDEX IF NOT EXISTS idx_agent_wallets_agent_address ON agent_wallets(agent_address);
+
+-- Enable RLS for agent wallets
+ALTER TABLE agent_wallets ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for agent wallets
+CREATE POLICY "Allow public read access to agent_wallets" ON agent_wallets
+  FOR SELECT USING (true);
+
+CREATE POLICY "Allow public insert to agent_wallets" ON agent_wallets
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public update to agent_wallets" ON agent_wallets
+  FOR UPDATE USING (true) WITH CHECK (true);
+
