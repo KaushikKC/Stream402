@@ -4,7 +4,7 @@
 
 Stream402 enables content creators to monetize their digital assets (images, videos, audio, etc.) through micropayments on Solana. Built with Next.js, it features autonomous agent networks, reputation systems, IPFS storage, and a comprehensive SDK for easy integration.
 
-## 🌟 Key Features
+## Key Features
 
 ### Core Functionality
 - **Image Upload & Monetization** - Upload images with custom pricing and tags
@@ -24,7 +24,13 @@ Stream402 enables content creators to monetize their digital assets (images, vid
 - **Search & Tags** - Find content by title or tags
 - **Supabase Database** - Production-ready PostgreSQL database with automatic fallback
 
-## 🚀 Quick Start
+## Links
+
+- [SDK Documentation](https://www.npmjs.com/package/stream402-sdk)
+- [Demo Video](https://youtu.be/jqnjHYQ5H1c)
+- [Live URL](https://stream402.vercel.app/)
+
+## Quick Start
 
 ### Prerequisites
 
@@ -219,7 +225,7 @@ User Query → Parse Query → Find Asset → Evaluate Decision → Auto-Pay →
 - **Balance Tracking** - Real-time balance and spending statistics
 - **Autonomous Mode** - Toggle for automatic payment decisions
 
-## 🎖️ Reputation System
+## Reputation System
 
 Stream402 includes a comprehensive reputation system that tracks user activity and mints NFTs for milestones.
 
@@ -265,7 +271,7 @@ Reputation NFTs are automatically minted when:
 - **Provider Dashboard** - Detailed reputation stats
 - **NFT Gallery** - View all minted reputation NFTs
 
-## 📦 Stream402 SDK
+## Stream402 SDK
 
 The Stream402 SDK makes it easy to integrate payment functionality into any application.
 
@@ -357,7 +363,7 @@ All images are uploaded to IPFS via Pinata:
 - IPFS URLs used for serving images
 - Local storage only used as fallback
 
-## 📊 Provider Dashboard
+## Provider Dashboard
 
 Content creators can track their performance at `/provider`:
 
@@ -367,14 +373,14 @@ Content creators can track their performance at `/provider`:
 - **Reputation Display** - Current reputation level and score
 - **NFT Gallery** - View all minted reputation NFTs
 
-## 🔍 Search & Discovery
+## Search & Discovery
 
 - **Search by Title** - Find assets by name
 - **Search by Tags** - Filter by tags
 - **Tag System** - Add tags when uploading for better discoverability
 - **Real-time Results** - Instant search results
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 img402/
@@ -440,7 +446,7 @@ img402/
 └── supabase-schema.sql         # Database schema
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Asset Management
 
@@ -570,7 +576,7 @@ Get reputation data for a wallet.
 }
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Manual Testing
 
@@ -607,7 +613,7 @@ npm test
 npm run test:integration
 ```
 
-## 🚢 Deployment
+## Deployment
 
 ### Vercel Deployment
 
@@ -638,7 +644,7 @@ npm run test:integration
 - [ ] Implement rate limiting
 - [ ] Set up monitoring
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Payment Verification Fails
 
@@ -673,7 +679,7 @@ npm run test:integration
 - Ensure agent wallet is funded
 - Review server logs for decryption errors
 
-## 📚 Dependencies
+## Dependencies
 
 ### Core
 - `next` - Next.js framework
@@ -705,19 +711,8 @@ MIT License
 
 Contributions welcome! Please open an issue or submit a PR.
 
-## 🔗 Links
 
-- [SDK Documentation](./sdk/README.md)
-- [Supabase Schema](./supabase-schema.sql)
-- [TODO List](./TODO.md)
 
-## 🎯 Hackathon Tracks
-
-Stream402 is designed for:
-
-- **Best Trustless Agent** - Autonomous agents with identity, reputation, and validation
-- **Best AgentPay Demo** - AI agents that autonomously pay for APIs, LLM tokens, or data via Solana USDC + HTTP-402
-
-## 📞 Support
+## Support
 
 For issues and questions, please open an issue on GitHub.
