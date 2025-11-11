@@ -99,8 +99,8 @@ export default function Home() {
           </div>
 
           <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-xl hover:shadow-[0_0_30px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/30 transform hover:-translate-y-2">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#1dd79b] to-[#14966c] rounded-xl flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(29,215,155,0.5)]">
+            <div className="bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-xl hover:shadow-[0_0_30px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/30 transform hover:-translate-y-2 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#1dd79b] to-[#14966c] rounded-xl flex items-center justify-center mb-4 mx-auto shadow-[0_0_20px_rgba(29,215,155,0.5)]">
                 <svg
                   className="w-6 h-6 text-black"
                   fill="none"
@@ -122,8 +122,8 @@ export default function Home() {
                 Blockchain-verified transactions on Solana
               </p>
             </div>
-            <div className="bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-xl hover:shadow-[0_0_30px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/30 transform hover:-translate-y-2">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#14966c] to-[#1dd79b] rounded-xl flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(29,215,155,0.5)]">
+            <div className="bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-xl hover:shadow-[0_0_30px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/30 transform hover:-translate-y-2 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#14966c] to-[#1dd79b] rounded-xl flex items-center justify-center mb-4 mx-auto shadow-[0_0_20px_rgba(29,215,155,0.5)]">
                 <svg
                   className="w-6 h-6 text-black"
                   fill="none"
@@ -145,8 +145,8 @@ export default function Home() {
                 Decentralized storage with Pinata
               </p>
             </div>
-            <div className="bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-xl hover:shadow-[0_0_30px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/30 transform hover:-translate-y-2">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#4de6b4] to-[#1dd79b] rounded-xl flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(29,215,155,0.5)]">
+            <div className="bg-black/80 backdrop-blur-md rounded-2xl p-8 shadow-xl hover:shadow-[0_0_30px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/30 transform hover:-translate-y-2 text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#4de6b4] to-[#1dd79b] rounded-xl flex items-center justify-center mb-4 mx-auto shadow-[0_0_20px_rgba(29,215,155,0.5)]">
                 <svg
                   className="w-6 h-6 text-black"
                   fill="none"

@@ -65,13 +65,13 @@ export function getReputationLevel(score: number): string {
  */
 export function getReputationLevelColor(level: string): string {
   const colors: Record<string, string> = {
-    Legendary: "from-purple-600 to-pink-600",
-    Master: "from-blue-600 to-indigo-600",
-    Expert: "from-green-600 to-emerald-600",
-    Advanced: "from-yellow-500 to-orange-500",
-    Intermediate: "from-blue-400 to-cyan-400",
-    Beginner: "from-gray-400 to-gray-500",
-    Newcomer: "from-gray-300 to-gray-400",
+    Legendary: "from-[#1dd79b] to-[#4de6b4]",
+    Master: "from-[#1dd79b] to-[#14966c]",
+    Expert: "from-[#14966c] to-[#1dd79b]",
+    Advanced: "from-[#1dd79b] to-[#4de6b4]",
+    Intermediate: "from-[#1dd79b] to-[#14966c]",
+    Beginner: "from-[#14966c] to-[#0d6b4f]",
+    Newcomer: "from-[#0d6b4f] to-[#14966c]",
   };
   return colors[level] || colors.Newcomer;
 }
