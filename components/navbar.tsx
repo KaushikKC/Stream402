@@ -11,15 +11,15 @@ export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200/80 bg-white/95 backdrop-blur-md shadow-sm">
+    <nav className="sticky top-0 z-50 border-b border-[#1dd79b]/20 bg-black/95 backdrop-blur-md shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300">
-                <span className="text-white font-bold text-sm">x</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-[#1dd79b] to-[#14966c] rounded-lg flex items-center justify-center transform group-hover:rotate-6 transition-transform duration-300 shadow-[0_0_15px_rgba(29,215,155,0.5)]">
+                <span className="text-black font-bold text-sm">x</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-[#1dd79b] to-[#14966c] bg-clip-text text-transparent">
                 Stream402
               </span>
             </Link>
@@ -28,8 +28,8 @@ export function Navbar() {
                 href="/"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   pathname === "/"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-[#1dd79b]/20 text-[#1dd79b] shadow-[0_0_10px_rgba(29,215,155,0.3)]"
+                    : "text-gray-400 hover:text-[#1dd79b] hover:bg-black/50"
                 }`}
               >
                 Home
@@ -38,8 +38,8 @@ export function Navbar() {
                 href="/upload"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   pathname === "/upload"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-[#1dd79b]/20 text-[#1dd79b] shadow-[0_0_10px_rgba(29,215,155,0.3)]"
+                    : "text-gray-400 hover:text-[#1dd79b] hover:bg-black/50"
                 }`}
               >
                 Upload
@@ -48,8 +48,8 @@ export function Navbar() {
                 href="/images"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   pathname === "/images"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-[#1dd79b]/20 text-[#1dd79b] shadow-[0_0_10px_rgba(29,215,155,0.3)]"
+                    : "text-gray-400 hover:text-[#1dd79b] hover:bg-black/50"
                 }`}
               >
                 Browse
@@ -58,8 +58,8 @@ export function Navbar() {
                 href="/provider"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   pathname === "/provider"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-[#1dd79b]/20 text-[#1dd79b] shadow-[0_0_10px_rgba(29,215,155,0.3)]"
+                    : "text-gray-400 hover:text-[#1dd79b] hover:bg-black/50"
                 }`}
               >
                 Dashboard
@@ -68,20 +68,20 @@ export function Navbar() {
                 href="/agent"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   pathname === "/agent"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-[#1dd79b]/20 text-[#1dd79b] shadow-[0_0_10px_rgba(29,215,155,0.3)]"
+                    : "text-gray-400 hover:text-[#1dd79b] hover:bg-black/50"
                 }`}
               >
-                🤖 Agent
+                Agent
               </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             {connected && publicKey && (
               <>
-                <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-green-700">
+                <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-[#1dd79b]/10 rounded-lg border border-[#1dd79b]/30">
+                  <div className="w-2 h-2 bg-[#1dd79b] rounded-full animate-pulse shadow-[0_0_10px_rgba(29,215,155,0.8)]"></div>
+                  <span className="text-sm font-medium text-[#1dd79b]">
                     {publicKey.toBase58().slice(0, 4)}...
                     {publicKey.toBase58().slice(-4)}
                   </span>

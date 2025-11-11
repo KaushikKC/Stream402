@@ -65,11 +65,23 @@ function ImageThumbnail({
   if (error) {
     return (
       <div
-        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3 cursor-pointer hover:from-gray-200 hover:to-gray-300 transition-all duration-300 border border-gray-200"
+        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black rounded-xl mb-3 cursor-pointer hover:from-gray-800 hover:to-gray-900 transition-all duration-300 border border-gray-700"
         onClick={onClick}
       >
         <div className="text-center">
-          <div className="text-2xl mb-2">🖼️</div>
+          <svg
+            className="w-12 h-12 text-gray-400 mx-auto mb-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
           <p className="text-sm text-gray-500 font-medium">Image not found</p>
         </div>
       </div>
@@ -79,7 +91,7 @@ function ImageThumbnail({
   if (loading || !imageSrc) {
     return (
       <div
-        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-3 cursor-pointer border border-gray-200 animate-pulse"
+        className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black rounded-xl mb-3 cursor-pointer border border-gray-700 animate-pulse"
         onClick={onClick}
       >
         <div className="text-center">
@@ -111,7 +123,7 @@ function ImageThumbnail({
 
   return (
     <div
-      className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl mb-3 overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 border border-gray-200"
+      className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black rounded-xl mb-3 overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 border border-gray-700"
       onClick={onClick}
     >
       <img
@@ -525,14 +537,14 @@ export default function ImagesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen relative py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl sm:text-5xl font-bold gradient-text mb-3">
             Image Gallery
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-300 text-lg font-light">
             Browse and purchase images. Pay with USDC to access full-resolution
             downloads.
           </p>
@@ -562,13 +574,13 @@ export default function ImagesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name or tags (e.g., sunrise, sunset, nature)..."
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white shadow-sm text-gray-900 placeholder:text-gray-400"
+                className="w-full pl-12 pr-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1dd79b] focus:border-[#1dd79b] transition-all duration-200 bg-black/70 shadow-sm text-gray-200 placeholder:text-gray-500"
               />
             </div>
             <button
               type="submit"
               disabled={isSearching}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-[#14966c] text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               {isSearching ? (
                 <span className="flex items-center gap-2">
@@ -605,7 +617,7 @@ export default function ImagesPage() {
                   setSearchQuery("");
                   fetchImages();
                 }}
-                className="px-4 py-3 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                className="px-4 py-3 bg-gray-700 text-gray-200 rounded-xl font-semibold hover:bg-gray-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
               >
                 Clear
               </button>
@@ -613,7 +625,7 @@ export default function ImagesPage() {
           </form>
           {searchQuery && (
             <div className="mt-3 flex items-center gap-2">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-400">
                 Showing results for:
               </span>
               <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
@@ -624,9 +636,21 @@ export default function ImagesPage() {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl text-red-700">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
             <div className="flex items-center gap-2">
-              <span className="text-xl">⚠️</span>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
               <span className="font-medium">{error}</span>
             </div>
           </div>
@@ -634,11 +658,23 @@ export default function ImagesPage() {
 
         {images.length === 0 && !isSearching && (
           <div className="text-center py-16">
-            <div className="text-6xl mb-4">🖼️</div>
-            <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+            <svg
+              className="w-16 h-16 text-gray-400 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <h3 className="text-2xl font-semibold text-gray-300 mb-2">
               No images found
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-400 mb-6">
               {searchQuery
                 ? "Try a different search term"
                 : "Upload your first image to get started"}
@@ -646,7 +682,7 @@ export default function ImagesPage() {
             {!searchQuery && (
               <Link
                 href="/upload"
-                className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                className="inline-block px-6 py-3 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black rounded-xl font-semibold shadow-lg hover:shadow-[0_0_30px_rgba(29,215,155,0.5)] transform hover:-translate-y-0.5 transition-all duration-300"
               >
                 Upload Image
               </Link>
@@ -665,7 +701,7 @@ export default function ImagesPage() {
             return (
               <div
                 key={img.id}
-                className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group hover:-translate-y-1"
+                className="bg-black/80 backdrop-blur-md rounded-2xl shadow-lg hover:shadow-xl hover:shadow-[0_0_20px_rgba(29,215,155,0.3)] transition-all duration-300 border border-[#1dd79b]/20 overflow-hidden group hover:-translate-y-1"
               >
                 <ImageThumbnail
                   src={img.thumb}
@@ -673,7 +709,7 @@ export default function ImagesPage() {
                   onClick={() => checkAccess(img.id)}
                 />
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="text-lg font-semibold text-gray-200 mb-2 line-clamp-2">
                     {img.title}
                   </h3>
                   {img.tags && img.tags.length > 0 && (
@@ -681,7 +717,7 @@ export default function ImagesPage() {
                       {img.tags.map((tag, idx) => (
                         <span
                           key={idx}
-                          className="text-xs px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-full font-medium border border-blue-200"
+                          className="text-xs px-2.5 py-1 bg-[#1dd79b]/10 text-[#1dd79b] rounded-full font-medium border border-[#1dd79b]/30"
                         >
                           {tag}
                         </span>
@@ -692,13 +728,13 @@ export default function ImagesPage() {
                     {connected && st.status === "idle" && (
                       <button
                         onClick={() => checkAccess(img.id)}
-                        className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black rounded-xl font-semibold shadow-md hover:shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)] transform hover:-translate-y-0.5 transition-all duration-300"
                       >
                         Check Access
                       </button>
                     )}
                     {st.status === "checking" && (
-                      <div className="w-full px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-medium text-center flex items-center justify-center gap-2">
+                      <div className="w-full px-4 py-2.5 bg-black/70 text-gray-400 rounded-xl font-medium text-center flex items-center justify-center gap-2 border border-gray-700">
                         <svg
                           className="animate-spin h-5 w-5"
                           xmlns="http://www.w3.org/2000/svg"
@@ -723,21 +759,21 @@ export default function ImagesPage() {
                       </div>
                     )}
                     {!connected && st.status !== "authorized" && (
-                      <div className="w-full px-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-xl text-sm text-center">
+                      <div className="w-full px-4 py-2.5 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 rounded-xl text-sm text-center">
                         Connect wallet to check access
                       </div>
                     )}
                     {st.status === "requires_payment" && (
                       <div className="space-y-2">
-                        <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
-                          <p className="text-sm font-semibold text-amber-800 text-center">
+                        <div className="px-4 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                          <p className="text-sm font-semibold text-yellow-400 text-center">
                             Payment Required
                           </p>
                         </div>
                         {connected ? (
                           <button
                             onClick={() => pay(img.id)}
-                            className="w-full px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                            className="w-full px-4 py-2.5 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black rounded-xl font-semibold shadow-md hover:shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)] transform hover:-translate-y-0.5 transition-all duration-300"
                           >
                             Pay{" "}
                             {formatUnits(
@@ -747,7 +783,7 @@ export default function ImagesPage() {
                             {st.paymentRequest.currency}
                           </button>
                         ) : (
-                          <div className="w-full px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm text-center">
+                          <div className="w-full px-4 py-2.5 bg-black/70 text-gray-400 rounded-xl text-sm text-center border border-gray-700">
                             Connect wallet to pay
                           </div>
                         )}
@@ -783,7 +819,7 @@ export default function ImagesPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => window.open(st.url, "_blank")}
-                            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black rounded-xl font-semibold shadow-md hover:shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)] transform hover:-translate-y-0.5 transition-all duration-300"
                           >
                             View Full
                           </button>
@@ -794,22 +830,22 @@ export default function ImagesPage() {
                             rel="noreferrer"
                             className="flex-1"
                           >
-                            <button className="w-full px-4 py-2.5 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+                            <button className="w-full px-4 py-2.5 bg-gray-700 text-gray-200 rounded-xl font-semibold hover:bg-gray-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
                               Download
                             </button>
                           </a>
                         </div>
-                        <div className="px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
-                          <p className="text-xs text-green-700 text-center font-medium">
-                            ⏱️ Expires in {remaining}s
+                        <div className="px-4 py-2 bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-xl">
+                          <p className="text-xs text-[#1dd79b] text-center font-medium">
+                            Expires in {remaining}s
                           </p>
                         </div>
                       </div>
                     )}
                     {st.status === "error" && (
                       <div className="space-y-2">
-                        <div className="px-4 py-2 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl">
-                          <p className="text-sm text-red-700 text-center font-medium">
+                        <div className="px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-xl">
+                          <p className="text-sm text-red-400 text-center font-medium">
                             {st.message}
                           </p>
                         </div>
@@ -820,7 +856,7 @@ export default function ImagesPage() {
                               [img.id]: { status: "idle" },
                             }))
                           }
-                          className="w-full px-4 py-2.5 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                          className="w-full px-4 py-2.5 bg-gray-700 text-gray-200 rounded-xl font-semibold hover:bg-gray-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
                         >
                           Try Again
                         </button>

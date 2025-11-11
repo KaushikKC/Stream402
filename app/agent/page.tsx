@@ -94,9 +94,14 @@ export default function AgentPage() {
         if (decision) {
           setAutonomousDecision(decision);
 
-          // If decision is positive, proceed with payment flow
+          // If decision is positive, proceed with automatic payment flow
           if (decision.shouldPay) {
-            // Fetch the payment challenge and auto-pay
+            console.log(
+              "🤖 Autonomous decision: PAYING automatically",
+              decision
+            );
+
+            // Fetch the payment challenge
             const res = await fetch("/api/agent/request", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -110,9 +115,27 @@ export default function AgentPage() {
             setResponse(data);
 
             // Auto-pay if payment challenge is available
-            if (data.paymentChallenge && data.requiresPayment) {
-              await handlePayAndDownload();
+            if (data.paymentChallenge && data.requiresPayment && data.assetId) {
+              // Update response with payment challenge for display
+              setResponse({
+                ...data,
+                message: `Autonomous payment approved. Processing payment for ${data.assetId}...`,
+              });
+
+              // Automatically proceed with payment
+              await handlePayAndDownload(data);
+            } else if (!data.requiresPayment && data.downloadUrl) {
+              // Free asset - already available
+              setDownloadedAsset(data.downloadUrl);
             }
+            setLoading(false);
+            return;
+          } else {
+            // Decision rejected - show why
+            setResponse({
+              success: false,
+              message: `Autonomous payment rejected: ${decision.reason}`,
+            });
             setLoading(false);
             return;
           }
@@ -143,15 +166,17 @@ export default function AgentPage() {
     }
   };
 
-  const handlePayAndDownload = async () => {
-    if (!response?.paymentChallenge || !publicKey || !sendTransaction) {
+  const handlePayAndDownload = async (responseData?: AgentResponse) => {
+    const dataToUse = responseData || response;
+    if (!dataToUse?.paymentChallenge || !publicKey || !sendTransaction) {
+      console.error("Cannot pay: missing payment challenge or wallet");
       return;
     }
 
     setPaying(true);
 
     try {
-      const challenge = response.paymentChallenge;
+      const challenge = dataToUse.paymentChallenge;
       const mint = new PublicKey(challenge.mint);
       const recipient = new PublicKey(challenge.recipient);
       const owner = publicKey;
@@ -250,15 +275,51 @@ export default function AgentPage() {
       }
 
       const { accessToken } = await receiptRes.json();
-      const downloadUrl = `/api/asset/${response.assetId}?token=${accessToken}`;
+      const assetId = dataToUse.assetId || challenge.assetId;
+
+      // Get asset details to check for IPFS URL
+      // If IPFS URL exists, use it directly (no token needed, IPFS is public)
+      // Otherwise, use the full endpoint with token
+      let downloadUrl: string;
+      try {
+        // Get asset list to find IPFS URL
+        const assetListRes = await fetch(`/api/images/list`);
+        if (assetListRes.ok) {
+          const { images } = await assetListRes.json();
+          const assetDetails = images.find((img: any) => img.id === assetId);
+
+          // If asset has IPFS URL, use it directly (public, no token needed)
+          if (assetDetails?.ipfsUrl) {
+            downloadUrl = assetDetails.ipfsUrl;
+            console.log("Using IPFS URL directly:", downloadUrl);
+          } else {
+            // Use full endpoint which will serve the image
+            downloadUrl = `/api/full/${assetId}?access=${accessToken}`;
+            console.log("Using full endpoint:", downloadUrl);
+          }
+        } else {
+          // Fallback to full endpoint
+          downloadUrl = `/api/full/${assetId}?access=${accessToken}`;
+        }
+      } catch (error) {
+        console.error("Error getting asset details:", error);
+        // Fallback to full endpoint
+        downloadUrl = `/api/full/${assetId}?access=${accessToken}`;
+      }
 
       setDownloadedAsset(downloadUrl);
       setResponse({
-        ...response,
+        ...dataToUse,
         success: true,
-        message: "Payment successful! Asset downloaded.",
+        message: "Payment successful! Asset downloaded automatically.",
         downloadUrl,
+        requiresPayment: false,
       });
+
+      // Auto-open download in new tab if autonomous mode
+      if (autonomousMode) {
+        window.open(downloadUrl, "_blank");
+      }
     } catch (error) {
       setResponse({
         ...response,
@@ -273,21 +334,21 @@ export default function AgentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen relative py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            🤖 Agent Network
+          <h1 className="text-5xl font-bold gradient-text mb-4">
+            Agent Network
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-300 font-light">
             Ask for any image in natural language. The agent will find it and
             handle payment automatically.
           </p>
         </div>
 
         {/* Search Interface */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div className="bg-black/80 backdrop-blur-md rounded-2xl shadow-xl border border-[#1dd79b]/20 p-8 mb-8">
           <div className="flex gap-4 mb-6">
             <input
               type="text"
@@ -295,29 +356,60 @@ export default function AgentPage() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               placeholder='Try: "I want a Solana logo" or "Show me a Bitcoin image"'
-              className="flex-1 px-6 py-4 text-lg border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
+              className="flex-1 px-6 py-4 text-lg border-2 border-gray-700 rounded-xl focus:outline-none focus:border-[#1dd79b] bg-black/70 text-gray-200 placeholder:text-gray-500"
               disabled={loading}
             />
             <button
               onClick={handleSearch}
               disabled={loading || !query.trim()}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              className="px-8 py-4 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black font-semibold rounded-xl hover:from-[#14966c] hover:to-[#0d6b4f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)]"
             >
               {loading ? "Searching..." : "Search"}
             </button>
           </div>
 
+          {/* Autonomous Mode Toggle */}
+          {connected && (
+            <div className="mb-4 flex items-center justify-between bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={autonomousMode}
+                    onChange={(e) => setAutonomousMode(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#1dd79b]/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-black after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#1dd79b] peer-checked:to-[#14966c]"></div>
+                  <span className="ml-3 text-sm font-medium text-gray-200">
+                    Autonomous Mode
+                  </span>
+                </label>
+                {autonomousMode && agentIdentity && (
+                  <span className="text-xs px-2 py-1 bg-[#1dd79b]/20 text-[#1dd79b] rounded-full border border-[#1dd79b]/30">
+                    {agentIdentity.reputation.level} • Score:{" "}
+                    {agentIdentity.reputation.score}
+                  </span>
+                )}
+              </div>
+              <div className="text-sm text-gray-400">
+                {autonomousMode
+                  ? "Agent will auto-pay and download"
+                  : "Manual payment required"}
+              </div>
+            </div>
+          )}
+
           {!connected && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-              <p className="text-yellow-800">
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
+              <p className="text-yellow-400">
                 Connect your wallet to enable automatic payments
               </p>
             </div>
           )}
 
           {connected && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-green-800">
+            <div className="bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-lg p-4">
+              <p className="text-[#1dd79b]">
                 Wallet connected: {publicKey?.toBase58().slice(0, 8)}...
                 {publicKey?.toBase58().slice(-8)}
               </p>
@@ -325,19 +417,76 @@ export default function AgentPage() {
           )}
         </div>
 
+        {/* Autonomous Decision Display */}
+        {autonomousDecision && (
+          <div className="bg-black/80 backdrop-blur-md rounded-2xl shadow-xl border border-[#1dd79b]/20 p-8 mb-6">
+            <h3 className="text-lg font-semibold text-[#1dd79b] mb-4">
+              Autonomous Decision
+            </h3>
+            <div
+              className={`p-4 rounded-lg ${
+                autonomousDecision.shouldPay
+                  ? "bg-[#1dd79b]/10 border border-[#1dd79b]/30"
+                  : "bg-yellow-500/10 border border-yellow-500/30"
+              }`}
+            >
+              <div className="space-y-2">
+                <p
+                  className={`font-semibold ${
+                    autonomousDecision.shouldPay
+                      ? "text-[#1dd79b]"
+                      : "text-yellow-400"
+                  }`}
+                >
+                  {autonomousDecision.shouldPay ? "Approved" : "Rejected"}
+                </p>
+                <p className="text-sm text-gray-300">
+                  {autonomousDecision.reason}
+                </p>
+                <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                  <div>
+                    <span className="text-gray-400">Confidence:</span>{" "}
+                    <span className="font-semibold text-[#1dd79b]">
+                      {autonomousDecision.confidence}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Price:</span>{" "}
+                    <span className="font-semibold text-[#1dd79b]">
+                      {Number(autonomousDecision.price) / 1e6} USDC
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Balance:</span>{" "}
+                    <span className="font-semibold text-[#1dd79b]">
+                      {Number(autonomousDecision.balance) / 1e6} USDC
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Reputation:</span>{" "}
+                    <span className="font-semibold text-[#1dd79b]">
+                      {autonomousDecision.reputationCheck ? "Valid" : "Invalid"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Response Display */}
         {response && (
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="bg-black/80 backdrop-blur-md rounded-2xl shadow-xl border border-[#1dd79b]/20 p-8">
             <div
               className={`mb-6 p-4 rounded-lg ${
                 response.success
-                  ? "bg-green-50 border border-green-200"
-                  : "bg-red-50 border border-red-200"
+                  ? "bg-[#1dd79b]/10 border border-[#1dd79b]/30"
+                  : "bg-red-500/10 border border-red-500/30"
               }`}
             >
               <p
                 className={`font-semibold ${
-                  response.success ? "text-green-800" : "text-red-800"
+                  response.success ? "text-[#1dd79b]" : "text-red-400"
                 }`}
               >
                 {response.message}
@@ -346,25 +495,25 @@ export default function AgentPage() {
 
             {response.requiresPayment && response.paymentChallenge && (
               <div className="space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <h3 className="font-semibold text-blue-900 mb-2">
+                <div className="bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-lg p-6">
+                  <h3 className="font-semibold text-[#1dd79b] mb-2">
                     Payment Required
                   </h3>
-                  <p className="text-blue-800 mb-4">
+                  <p className="text-[#4de6b4] mb-4">
                     Price: {Number(response.paymentChallenge.amount) / 1e6} USDC
                   </p>
                   {connected ? (
                     <button
-                      onClick={handlePayAndDownload}
+                      onClick={() => handlePayAndDownload()}
                       disabled={paying}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-3 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black font-semibold rounded-lg hover:from-[#14966c] hover:to-[#0d6b4f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)]"
                     >
                       {paying ? "Processing Payment..." : "Pay & Download"}
                     </button>
                   ) : (
                     <button
                       onClick={connect}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                      className="px-6 py-3 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black font-semibold rounded-lg hover:from-[#14966c] hover:to-[#0d6b4f] transition-all duration-200 shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)]"
                     >
                       Connect Wallet to Pay
                     </button>
@@ -378,7 +527,7 @@ export default function AgentPage() {
                 <a
                   href={response.downloadUrl}
                   download
-                  className="inline-block px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200"
+                  className="inline-block px-6 py-3 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black font-semibold rounded-lg hover:from-[#14966c] hover:to-[#0d6b4f] transition-all duration-200 shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)]"
                 >
                   Download Asset
                 </a>
@@ -387,14 +536,14 @@ export default function AgentPage() {
 
             {downloadedAsset && (
               <div className="mt-6">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <p className="text-green-800 font-semibold mb-2">
-                    ✅ Payment Successful!
+                <div className="bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-lg p-4 mb-4">
+                  <p className="text-[#1dd79b] font-semibold mb-2">
+                    Payment Successful
                   </p>
                   <a
                     href={downloadedAsset}
                     download
-                    className="inline-block px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200"
+                    className="inline-block px-6 py-3 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black font-semibold rounded-lg hover:from-[#14966c] hover:to-[#0d6b4f] transition-all duration-200 shadow-lg hover:shadow-[0_0_20px_rgba(29,215,155,0.5)]"
                   >
                     Download Asset
                   </a>
@@ -404,17 +553,17 @@ export default function AgentPage() {
 
             {response.alternatives && response.alternatives.length > 0 && (
               <div className="mt-6">
-                <h3 className="font-semibold text-gray-900 mb-3">
+                <h3 className="font-semibold text-[#1dd79b] mb-3">
                   Other matches:
                 </h3>
                 <div className="space-y-2">
                   {response.alternatives.map((alt) => (
                     <div
                       key={alt.id}
-                      className="bg-gray-50 border border-gray-200 rounded-lg p-3"
+                      className="bg-black/70 border border-[#1dd79b]/20 rounded-lg p-3"
                     >
-                      <p className="text-gray-900 font-medium">{alt.title}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-gray-200 font-medium">{alt.title}</p>
+                      <p className="text-sm text-gray-400">
                         Price: {alt.price} USDC | Match: {alt.matchScore}
                       </p>
                     </div>
@@ -425,8 +574,8 @@ export default function AgentPage() {
 
             {response.suggestions && (
               <div className="mt-6">
-                <p className="text-gray-600 mb-2">Suggestions:</p>
-                <ul className="list-disc list-inside text-gray-700">
+                <p className="text-gray-400 mb-2">Suggestions:</p>
+                <ul className="list-disc list-inside text-gray-300">
                   {response.suggestions.map((suggestion, i) => (
                     <li key={i}>{suggestion}</li>
                   ))}
@@ -437,8 +586,8 @@ export default function AgentPage() {
         )}
 
         {/* Example Queries */}
-        <div className="mt-8 bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="mt-8 bg-black/80 backdrop-blur-md rounded-2xl shadow-xl border border-[#1dd79b]/20 p-8">
+          <h2 className="text-2xl font-bold text-[#1dd79b] mb-4">
             Example Queries
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -454,7 +603,7 @@ export default function AgentPage() {
                   setQuery(example);
                   setTimeout(() => handleSearch(), 100);
                 }}
-                className="text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors duration-200 text-gray-700"
+                className="text-left px-4 py-3 bg-black/70 hover:bg-[#1dd79b]/10 border border-[#1dd79b]/20 rounded-lg transition-colors duration-200 text-gray-300 hover:text-[#1dd79b]"
               >
                 "{example}"
               </button>

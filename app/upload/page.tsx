@@ -69,25 +69,25 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 sm:p-10">
+    <main className="min-h-screen relative py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto relative z-10">
+        <div className="bg-black/80 backdrop-blur-md rounded-2xl shadow-xl border border-[#1dd79b]/20 p-8 sm:p-10">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold gradient-text mb-2">
               Upload Image
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               Upload your image and set a price. It will be stored on IPFS and
               monetized with Solana payments.
             </p>
           </div>
 
           {!connected && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
-              <p className="text-amber-800 font-medium mb-1">
+            <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+              <p className="text-yellow-400 font-medium mb-1">
                 Connect your wallet
               </p>
-              <p className="text-sm text-amber-700">
+              <p className="text-sm text-yellow-300">
                 Connect your wallet from the navbar above to set it as the
                 recipient address, or enter a different address below.
               </p>
@@ -95,15 +95,15 @@ export default function UploadPage() {
           )}
 
           {connected && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+            <div className="mb-6 p-4 bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <p className="font-semibold text-blue-900">Connected Wallet</p>
+                <div className="w-2 h-2 bg-[#1dd79b] rounded-full animate-pulse shadow-[0_0_10px_rgba(29,215,155,0.8)]"></div>
+                <p className="font-semibold text-[#1dd79b]">Connected Wallet</p>
               </div>
-              <p className="text-sm text-blue-700 font-mono">
+              <p className="text-sm text-[#4de6b4] font-mono">
                 {publicKey?.toBase58()}
               </p>
-              <p className="text-xs text-blue-600 mt-2">
+              <p className="text-xs text-[#1dd79b] mt-2">
                 This will be used as the recipient address if not specified
                 below.
               </p>
@@ -114,7 +114,7 @@ export default function UploadPage() {
             <div>
               <label
                 htmlFor="file"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-300 mb-2"
               >
                 Image File *
               </label>
@@ -124,13 +124,14 @@ export default function UploadPage() {
                   id="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-600 file:to-indigo-600 file:text-white hover:file:from-blue-700 hover:file:to-indigo-700 file:transition-all file:cursor-pointer cursor-pointer"
+                  className="block w-full text-sm text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-[#1dd79b] file:to-[#14966c] file:text-black hover:file:from-[#14966c] hover:file:to-[#0d6b4f] file:transition-all file:cursor-pointer cursor-pointer"
                   required
                 />
               </div>
               {file && (
-                <p className="mt-2 text-sm text-gray-600">
-                  Selected: <span className="font-medium">{file.name}</span>
+                <p className="mt-2 text-sm text-gray-400">
+                  Selected:{" "}
+                  <span className="font-medium text-gray-300">{file.name}</span>
                 </p>
               )}
             </div>
@@ -138,7 +139,7 @@ export default function UploadPage() {
             <div>
               <label
                 htmlFor="title"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-300 mb-2"
               >
                 Title
               </label>
@@ -148,14 +149,14 @@ export default function UploadPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Give your image a title"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1dd79b] focus:border-[#1dd79b] transition-all duration-200 bg-black/70 text-gray-200 placeholder:text-gray-500"
               />
             </div>
 
             <div>
               <label
                 htmlFor="price"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-300 mb-2"
               >
                 Price (USDC) *
               </label>
@@ -167,14 +168,14 @@ export default function UploadPage() {
                 step="0.01"
                 min="0.01"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1dd79b] focus:border-[#1dd79b] transition-all duration-200 bg-black/70 text-gray-200 placeholder:text-gray-500"
               />
             </div>
 
             <div>
               <label
                 htmlFor="recipient"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-300 mb-2"
               >
                 Recipient Wallet Address
               </label>
@@ -186,9 +187,9 @@ export default function UploadPage() {
                 placeholder={
                   publicKey?.toBase58() || "Enter Solana wallet address"
                 }
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white font-mono text-sm text-gray-900 placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1dd79b] focus:border-[#1dd79b] transition-all duration-200 bg-black/70 font-mono text-sm text-gray-200 placeholder:text-gray-500"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1">
                 Optional - uses connected wallet if not set
               </p>
             </div>
@@ -196,7 +197,7 @@ export default function UploadPage() {
             <div>
               <label
                 htmlFor="tags"
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-gray-300 mb-2"
               >
                 Tags
               </label>
@@ -206,26 +207,50 @@ export default function UploadPage() {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="sunrise, sunset, nature, landscape"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-900 placeholder:text-gray-400"
+                className="w-full px-4 py-3 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1dd79b] focus:border-[#1dd79b] transition-all duration-200 bg-black/70 text-gray-200 placeholder:text-gray-500"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1">
                 Separate tags with commas. These help users find your images.
               </p>
             </div>
 
             {error && (
-              <div className="p-4 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl text-red-700 animate-fade-in">
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 animate-fade-in">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">⚠️</span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
                   <span className="font-medium">{error}</span>
                 </div>
               </div>
             )}
 
             {success && (
-              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl text-green-700 animate-fade-in">
+              <div className="p-4 bg-[#1dd79b]/10 border border-[#1dd79b]/30 rounded-xl text-[#1dd79b] animate-fade-in">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">✅</span>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                   <span className="font-medium">{success}</span>
                 </div>
               </div>
@@ -234,7 +259,7 @@ export default function UploadPage() {
             <button
               type="submit"
               disabled={uploading || !file}
-              className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 disabled:hover:shadow-lg"
+              className="w-full px-6 py-4 bg-gradient-to-r from-[#1dd79b] to-[#14966c] text-black rounded-xl font-semibold shadow-lg hover:shadow-[0_0_30px_rgba(29,215,155,0.5)] transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 disabled:hover:shadow-lg"
             >
               {uploading ? (
                 <span className="flex items-center justify-center gap-2">
