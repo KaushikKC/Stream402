@@ -34,7 +34,7 @@ export interface AssetMetadata {
   currency: string;
   mint: string;
   recipient: string;
-  filename: string;
+  filename?: string; // Optional: not needed in serverless (IPFS-only) environments
   thumbFilename?: string;
   ipfsCid?: string; // IPFS Content Identifier
   ipfsUrl?: string; // IPFS URL for the image

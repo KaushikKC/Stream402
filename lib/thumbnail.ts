@@ -71,3 +71,51 @@ export async function generateThumbnail(
   }
 }
 
+/**
+ * Generate a low-resolution thumbnail buffer in memory (for serverless environments)
+ * @param buffer - Image buffer
+ * @param mimeType - Original file MIME type
+ * @param maxWidth - Maximum width for thumbnail (default: 400)
+ * @param maxHeight - Maximum height for thumbnail (default: 400)
+ * @param quality - JPEG quality (1-100, default: 70)
+ * @returns Thumbnail buffer
+ */
+export async function generateThumbnailBuffer(
+  buffer: Buffer,
+  mimeType: string,
+  maxWidth: number = 400,
+  maxHeight: number = 400,
+  quality: number = 70
+): Promise<Buffer> {
+  try {
+    // For SVG files, we can't resize them with sharp, so return original
+    if (mimeType === "image/svg+xml" || mimeType.includes("svg")) {
+      return buffer;
+    }
+
+    // Use sharp to resize and compress the image
+    const sharpInstance = sharp(buffer);
+
+    // Resize image to thumbnail size
+    // Maintain aspect ratio, fit within maxWidth x maxHeight
+    const thumbnailBuffer = await sharpInstance
+      .resize(maxWidth, maxHeight, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({ quality }) // Convert to JPEG for smaller file size
+      .toBuffer();
+
+    console.log("Generated thumbnail buffer:", {
+      originalSize: buffer.length,
+      thumbnailSize: thumbnailBuffer.length,
+    });
+
+    return thumbnailBuffer;
+  } catch (error) {
+    console.error("Error generating thumbnail buffer:", error);
+    // If thumbnail generation fails, return original buffer as fallback
+    return buffer;
+  }
+}
+

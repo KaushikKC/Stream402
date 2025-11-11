@@ -27,6 +27,16 @@ export async function GET(
     return NextResponse.redirect(asset.ipfsUrl, 302);
   }
 
+  // In serverless mode, IPFS URL is required
+  if (!asset.filename) {
+    return NextResponse.json(
+      {
+        error: "Asset not available (IPFS upload required in serverless mode)",
+      },
+      { status: 404 }
+    );
+  }
+
   // Fallback to local file - serve thumbnail (low-res) if available, otherwise original
   try {
     // Try to use thumbnail first (low-resolution)
