@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS assets (
   currency TEXT NOT NULL DEFAULT 'USDC',
   mint TEXT NOT NULL,
   recipient TEXT NOT NULL,
-  filename TEXT NOT NULL,
+  filename TEXT, -- Made nullable for serverless/IPFS-only environments
   thumb_filename TEXT,
   ipfs_cid TEXT,
   ipfs_url TEXT,
@@ -21,6 +21,10 @@ CREATE TABLE IF NOT EXISTS assets (
   created_at BIGINT NOT NULL,
   created_at_timestamp TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration: Make filename nullable if table already exists
+-- Run this if you already have the assets table with NOT NULL constraint
+ALTER TABLE assets ALTER COLUMN filename DROP NOT NULL;
 
 -- Payments table
 CREATE TABLE IF NOT EXISTS payments (
